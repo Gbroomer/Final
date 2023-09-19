@@ -15,10 +15,11 @@ class User(db.Model, SerializerMixin):
     
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(30), unique=True, nullable=False)
-    email = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.String(80), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default = datetime.now)
     updated_at = db.Column(db.DateTime, nullable=False, default = datetime.now, onupdate=datetime.now)
+    lvl = db.Column(db.Integer, default=1, nullable=False)
+    xp = db.Column(db.Integer, default=0, nullable=False)
     char_1 = db.Column(db.Integer, db.ForeignKey('chars.id'))
     char_2 = db.Column(db.Integer, db.ForeignKey('chars.id'))
     char_3 = db.Column(db.Integer, db.ForeignKey('chars.id'))
@@ -30,7 +31,7 @@ class User(db.Model, SerializerMixin):
     char4 = db.relationship('Char', foreign_keys=[char_4])
     inv = db.relationship('Inventory', backref = 'user', cascade = 'all, delete-orphan')
     
-    serialize_only = ('username', 'email', 'password', 'char1', 'char2', 'char3', 'char4', 'inv' )
+    serialize_only = ('username', 'password', 'char1', 'char2', 'char3', 'char4', 'inv', 'lvl', 'xp', 'id',)
     # serialize_rules = ('-char1.', '-char2_slot', '-char3_slot', '-char4_slot', '-inventory')
     
     @validates('username')
@@ -39,26 +40,6 @@ class User(db.Model, SerializerMixin):
             raise ValueError('Username Already Exists')
         return username
     
-    @validates('password')
-    def validate_password(self, key, password):
-        length_test = len(password) >= 8
-        uppercase_test = re.search(r'[A-Z]', password) is not None
-        lowercase_test = re.search(r'[a-z]', password) is not None
-        digit_test = re.search(r'[0-9]', password) is not None
-        special_test = re.search(r'[!@#$%^&*()\-_=+{}[\]|\\:;"\'<>,.?/~]', password) is not None
-        if length_test and uppercase_test and special_test and lowercase_test and digit_test:
-            return password
-        else:
-            raise ValueError('Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit, and one special character.')
-        
-    @validates('email')
-    def validate_email(self, key, email):
-        if User.query.filter_by(email=email).first():
-            raise ValueError('Email already exists')
-        if validate_email(email):
-            return email
-        else: 
-            raise ValueError('Invalid email')
         
 class Char(db.Model, SerializerMixin):
     
@@ -73,10 +54,10 @@ class Char(db.Model, SerializerMixin):
     mag = db.Column(db.Integer, nullable=False)
     res = db.Column(db.Integer, nullable=False)
     spd = db.Column(db.Integer, nullable=False)
-    exp = db.Column(db.Integer, nullable=False)
-    lvl = db.Column(db.Integer, nullable=False)
-    hp = db.Column(db.Integer, nullable=False)
-    mp = db.Column(db.Integer, nullable=False)
+    current_hp = db.Column(db.Integer, nullable=False)
+    max_hp = db.Column(db.Integer, nullable=False)
+    current_mp = db.Column(db.Integer, nullable=False)
+    max_mp = db.Column(db.Integer, nullable=False)
     wep_id = db.Column(db.Integer, db.ForeignKey('treasures.id'), nullable = False)
     arm_id = db.Column(db.Integer, db.ForeignKey('treasures.id'), nullable = False)
 
@@ -88,7 +69,7 @@ class Char(db.Model, SerializerMixin):
     armor = db.relationship('Treasure', foreign_keys=[arm_id], )
     character_class = db.relationship('Class', foreign_keys=[char_class],)
     
-    serialize_only = ('char_name', 'character_class', 'str', 'agi', 'con', 'mag', 'res', 'spd', 'exp', 'lvl', 'hp', 'mp', 'weapon', 'armor',)
+    serialize_only = ('char_name', 'character_class', 'str', 'agi', 'con', 'mag', 'res', 'spd', 'current_hp', 'max_hp', 'current_mp', 'max_mp', 'weapon', 'armor', 'id',)
     # serialize_rules = ('-char1_slot.char1_slot', '-char2_slot.char2_slot', '-char3_slot.char3_slot', '-char4_slot.char4_slot',)
     # serialize_rules = ('-weapon_treasure.weapon_chars', '-treasure.armor_chars', '-char1_slot', '-char2_slot', '-char3_slot',)
 
@@ -110,7 +91,7 @@ class Class(db.Model, SerializerMixin):
     abilities = db.relationship("Class_Ability_Association", backref='class', lazy='dynamic')
     chars = db.relationship('Char', backref='class', lazy='dynamic')
     
-    serialize_only = ('class_name', 'str_growth', 'agi_growth', 'con_growth', 'mag_growth', 'res_growth', 'spd_growth', 'hp_growth', 'mp_growth', 'abilities',)
+    serialize_only = ('class_name', 'str_growth', 'agi_growth', 'con_growth', 'mag_growth', 'res_growth', 'spd_growth', 'hp_growth', 'mp_growth', 'abilities', 'id',)
     
 class Ability(db.Model, SerializerMixin):
     
@@ -187,6 +168,7 @@ class Treasure(db.Model, SerializerMixin):
     __tablename__ = 'treasures'
     
     id = db.Column(db.Integer, primary_key=True)
+    
     name = db.Column(db.String)
     description = db.Column(db.String)
     type = db.Column(db.String, default='wep') ##wep or arm

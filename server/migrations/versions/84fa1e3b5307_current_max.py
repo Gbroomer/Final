@@ -1,8 +1,8 @@
-"""init
+"""current/max
 
-Revision ID: d7ed4eefac1a
+Revision ID: 84fa1e3b5307
 Revises: 
-Create Date: 2023-09-15 12:54:48.581385
+Create Date: 2023-09-18 09:12:57.742355
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'd7ed4eefac1a'
+revision = '84fa1e3b5307'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -33,6 +33,7 @@ def upgrade():
     sa.Column('damage_type', sa.String(), nullable=True),
     sa.Column('damage_range', sa.Integer(), nullable=True),
     sa.Column('damage_ability', sa.String(), nullable=True),
+    sa.Column('damage_bonus', sa.Integer(), nullable=True),
     sa.Column('level_req', sa.Integer(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
@@ -86,8 +87,8 @@ def upgrade():
     sa.Column('type', sa.String(), nullable=True),
     sa.Column('consumable_effect', sa.String(), nullable=True),
     sa.Column('consumable_potency', sa.Integer(), nullable=True),
-    sa.Column('ability_buff', sa.String(), nullable=True),
-    sa.Column('ability_potency', sa.Integer(), nullable=True),
+    sa.Column('stat_buff', sa.String(), nullable=True),
+    sa.Column('stat_potency', sa.Integer(), nullable=True),
     sa.Column('reduction', sa.Boolean(), nullable=True),
     sa.Column('damage_reduction', sa.Integer(), nullable=True),
     sa.Column('boost', sa.Boolean(), nullable=True),
@@ -105,10 +106,10 @@ def upgrade():
     sa.Column('mag', sa.Integer(), nullable=False),
     sa.Column('res', sa.Integer(), nullable=False),
     sa.Column('spd', sa.Integer(), nullable=False),
-    sa.Column('exp', sa.Integer(), nullable=False),
-    sa.Column('lvl', sa.Integer(), nullable=False),
-    sa.Column('hp', sa.Integer(), nullable=False),
-    sa.Column('mp', sa.Integer(), nullable=False),
+    sa.Column('current_hp', sa.Integer(), nullable=False),
+    sa.Column('max_hp', sa.Integer(), nullable=False),
+    sa.Column('current_mp', sa.Integer(), nullable=False),
+    sa.Column('max_mp', sa.Integer(), nullable=False),
     sa.Column('wep_id', sa.Integer(), nullable=False),
     sa.Column('arm_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['arm_id'], ['treasures.id'], name=op.f('fk_chars_arm_id_treasures')),
@@ -143,10 +144,11 @@ def upgrade():
     op.create_table('users',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('username', sa.String(length=30), nullable=False),
-    sa.Column('email', sa.String(length=255), nullable=False),
     sa.Column('password', sa.String(length=80), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
+    sa.Column('lvl', sa.Integer(), nullable=False),
+    sa.Column('xp', sa.Integer(), nullable=False),
     sa.Column('char_1', sa.Integer(), nullable=True),
     sa.Column('char_2', sa.Integer(), nullable=True),
     sa.Column('char_3', sa.Integer(), nullable=True),
@@ -156,7 +158,6 @@ def upgrade():
     sa.ForeignKeyConstraint(['char_3'], ['chars.id'], name=op.f('fk_users_char_3_chars')),
     sa.ForeignKeyConstraint(['char_4'], ['chars.id'], name=op.f('fk_users_char_4_chars')),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('email'),
     sa.UniqueConstraint('username')
     )
     op.create_table('inventories',

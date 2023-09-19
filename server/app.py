@@ -20,7 +20,7 @@ def index():
 ################################################################
 class Users(Resource):
     def get(self):
-        users = [user.to_dict(rules=('-created_at', '-updated_at', '-char1', '-char2', '-char3', '-char4', '-inv')) for user in User.query.all()]
+        users = [user.to_dict(rules=('-created_at', '-updated_at', '-char1', '-char2', '-char3', '-char4', '-inv', '-lvl', '-xp',)) for user in User.query.all()]
         return make_response(jsonify(users), 200)
     def post(self):
         data = request.get_json(force=True)
@@ -121,7 +121,7 @@ api.add_resource(CharsById, '/chars/<int:id>')
 # ################################################################
 class Classes(Resource):
     def get(self):
-        classes = [char_class.to_dict() for char_class in Classes.query.all()]
+        classes = [char_class.to_dict() for char_class in Class.query.all()]
         return make_response(jsonify(classes), 200)
 api.add_resource(Classes, '/classes')
 
@@ -193,7 +193,6 @@ class Environments(Resource):
 api.add_resource(Environments, '/environments')
 
 ###################################################################
-
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)

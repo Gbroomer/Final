@@ -1,0 +1,34 @@
+@import "../base/variables.scss";
+@import "../base/colors.scss";
+
+$nav-nested-margin-left: 1em;
+$nav-item-padding: 0.25em;
+
+// ul
+.rpg-nav {
+    font-size: $base-font-size;
+    list-style: none;
+
+    .rpg-nav {
+        font-size: inherit;
+        margin-left: $nav-nested-margin-left;
+    }
+}
+
+// li
+.rpg-nav-item {
+    line-height: 1;
+    padding: $nav-item-padding 0em;
+
+    &:last-child {
+        padding-bottom: 0;
+    }
+
+    &.is-active .rpg-nav-a::after {
+        opacity: 1;
+    }
+}
+
+.rpg-nav-a {
+    display: block;
+}

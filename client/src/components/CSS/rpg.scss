@@ -1,0 +1,25 @@
+// :root {
+//   --bg: #282c34;
+//   --header: #fff;
+//   --link: #61dafb;
+//   --text: hsla(0, 0%, 100%, 0.88);
+// }
+
+// base
+@import "./CSS/base/reset.scss";
+
+// controls
+@import "./CSS/controls/textbox.scss";
+@import "./CSS/controls/toggle.scss";
+@import "./CSS/controls/button.scss";
+
+// components
+@import "./CSS/components/boxes.scss";
+@import "./CSS/components/nav.scss";
+@import "./CSS/components/progress.scss";
+
+// utilities
+@import "./CSS/utilities/text.scss";
+
+// themes
+@import "./CSS/themes/themes.scss";
