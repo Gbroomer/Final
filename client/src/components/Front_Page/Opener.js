@@ -1,6 +1,6 @@
 import { useHistory } from 'react-router-dom';
 import React, { useState, useContext } from 'react'
-import MyContext from "../Context"
+import { MyContext } from "../Context"
 import * as yup from "yup"
 import { useFormik } from 'formik'
 
@@ -37,8 +37,8 @@ function Opener() {
                         const user = await response.json()
                         console.log(user)
                         login(user)
-                        // Change Page to Main Pag
-                        history.push("")
+                        // Change Page to Main Page
+                        history.push("/Main")
                     }
                     else {
                         alert('Incorrect Password')

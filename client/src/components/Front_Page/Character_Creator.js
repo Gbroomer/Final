@@ -1,5 +1,6 @@
-import MyContext from '../Context'
-import { useState, useContext, useEffect } from 'react'
+import { MyContext } from '../Context'
+import { useState, useContext, useEffect, } from 'react'
+import { useHistory } from 'react-router-dom'
 
 
 function Character_Creator() {
@@ -8,6 +9,7 @@ function Character_Creator() {
     const [charClasses, setCharClasses] = useState([-1, -1, -1, -1])
     const [classes, setClasses] = useState([])
     const [confirm, setConfirm] = useState(false)
+    const history = useHistory()
     // console.log(user)
 
     useEffect(() => {
@@ -56,7 +58,7 @@ function Character_Creator() {
                     current_mp: 10 + parseInt(selectedClass.mp_growth, 10),
                     max_mp: 10 + parseInt(selectedClass.mp_growth, 10),
                     wep_id: 1,
-                    arm_id: 1,
+                    arm_id: 2,
                 }
                 console.log(newCharacter)
                 console.log(user)
@@ -90,24 +92,29 @@ function Character_Creator() {
                     body: JSON.stringify(newUser)
                 })
                 const generatedUser = await resp.json()
-                console.log(generatedUser)
+                console.log(generatedUser.id)
                 const inventory = {
                     user_id: generatedUser.id
                 }
-                const respInv = await fetch('http://127.0.0.1:5555/inventories', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Accept: 'application/json',
-                    },
-                    body: JSON.stringify(inventory),
-                })
-                const generatedInventory = await respInv.json()
-                console.log(generatedInventory)
-                const finalCharacterCreationResp = await fetch(`http://127.0.0.1:5555/users/${generatedUser.id}`)
-                const finalizedCharacter = await finalCharacterCreationResp.json()
-                console.log(finalizedCharacter)
-                login(finalizedCharacter)
+                try {
+                    const respInv = await fetch('http://127.0.0.1:5555/inventories', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Accept: 'application/json',
+                        },
+                        body: JSON.stringify(inventory),
+                    })
+                    const generatedInventory = await respInv.json()
+                    console.log(generatedInventory)
+                    const finalCharacterCreationResp = await fetch(`http://127.0.0.1:5555/users/${generatedUser.id}`)
+                    const finalizedCharacter = await finalCharacterCreationResp.json()
+                    console.log(finalizedCharacter)
+                    login(finalizedCharacter)
+                    history.push("/Main")
+                } catch (error) {
+                    alert(error.message)
+                }
             } catch (error) {
                 alert(error.message)
             }

@@ -1,8 +1,8 @@
-"""current/max
+"""test
 
-Revision ID: 84fa1e3b5307
+Revision ID: cf85353d109a
 Revises: 
-Create Date: 2023-09-18 09:12:57.742355
+Create Date: 2023-09-19 16:36:41.996867
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '84fa1e3b5307'
+revision = 'cf85353d109a'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -71,6 +71,7 @@ def upgrade():
     sa.Column('spd', sa.Integer(), nullable=False),
     sa.Column('exp', sa.Integer(), nullable=False),
     sa.Column('lvl', sa.Integer(), nullable=False),
+    sa.Column('gold', sa.Integer(), nullable=False),
     sa.Column('damage_type', sa.String(), nullable=False),
     sa.Column('damage_ability', sa.String(), nullable=False),
     sa.Column('damage_range', sa.Integer(), nullable=False),
@@ -94,6 +95,7 @@ def upgrade():
     sa.Column('boost', sa.Boolean(), nullable=True),
     sa.Column('damage_boost', sa.Integer(), nullable=True),
     sa.Column('level', sa.Integer(), nullable=True),
+    sa.Column('cost', sa.Integer(), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('chars',
@@ -149,6 +151,7 @@ def upgrade():
     sa.Column('updated_at', sa.DateTime(), nullable=False),
     sa.Column('lvl', sa.Integer(), nullable=False),
     sa.Column('xp', sa.Integer(), nullable=False),
+    sa.Column('gold', sa.Integer(), nullable=True),
     sa.Column('char_1', sa.Integer(), nullable=True),
     sa.Column('char_2', sa.Integer(), nullable=True),
     sa.Column('char_3', sa.Integer(), nullable=True),

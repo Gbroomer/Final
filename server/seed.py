@@ -25,7 +25,7 @@ if __name__ == '__main__':
         Save.query.delete()
         db.session.commit()
         print('deleted all DB entries, starting seed...')
-        
+
         ################################################################
         print('Creating Treasures')
         sword = Treasure(
@@ -40,7 +40,8 @@ if __name__ == '__main__':
             damage_reduction = 0,
             boost = True,
             damage_boost = 2,
-            level = 1
+            level = 1,
+            cost = 5,
         )
         chain = Treasure(
             name = 'Worn Chainmail',
@@ -54,9 +55,86 @@ if __name__ == '__main__':
             damage_reduction = 3,
             boost = False,
             damage_boost = 0,
-            level = 1
+            level = 3,
+            cost = 5,
         )
-        items = [sword, chain]
+        dagger = Treasure(
+            name = 'Rusted Dagger', 
+            description = "A pitiful little thing. Careful around wounds and not to nick yourself.", 
+            type = 'wep',
+            consumable_effect = 'none',
+            consumable_potency = 0,
+            stat_buff = 'none',
+            stat_potency = 0,
+            reduction = False,
+            damage_reduction = 0,
+            boost = True,
+            damage_boost = 1,
+            level = 1,
+            cost = 2,
+        )
+        rags = Treasure(
+            name = 'Tattered Rags',
+            description = 'A pitiful set of rags that hardly count as clothing.',
+            type = 'arm',
+            consumable_effect = 'none',
+            consumable_potency = 0,
+            stat_buff = 'none',
+            stat_potency = 0,
+            reduction = True,
+            damage_reduction = 1,
+            boost = False,
+            damage_boost = 0,
+            level = 1,
+            cost = 2,
+        )
+        healing_pot= Treasure(
+            name = 'Lesser Healing Potion',
+            description = 'A minor refreshment. Will slightly restore your health.',
+            type = "consume",
+            consumable_effect = 'heal',
+            consumable_potency = 10,
+            stat_buff = 'none',
+            stat_potency = 0,
+            reduction = False,
+            damage_reduction = 0,
+            boost = False,
+            damage_boost = 0,
+            level = 1,
+            cost = 10,
+        )
+        mana_pot = Treasure(
+            name = 'Lesser Mana Potion',
+            description = 'A minor refreshment. Will slightly restore your mana.',
+            type = 'consume',
+            consumable_effect = 'mana',
+            consumable_potency = 12,
+            stat_buff = 'none',
+            stat_potency = 0,
+            reduction = False,
+            damage_reduction = 0,
+            boost = False,
+            damage_boost = 0,
+            level = 1,
+            cost = 15,
+        )
+        axe = Treasure(
+            name = 'Hand Axe',
+            description = 'A decent substitute for a proper weapon. Will definitely be useful to chop wood with',
+            type = 'wep',
+            consumable_effect = 'none',
+            consumable_potency = 0,
+            stat_buff = 'none',
+            stat_potency = 0,
+            reduction = False,
+            damage_reduction = 0,
+            boost = True,
+            damage_boost = 4,
+            level = 3,
+            cost = 20,
+        )
+        
+        items = [dagger, rags, sword, chain, healing_pot, mana_pot, axe]
         db.session.add_all(items)
         db.session.commit()
         
@@ -223,8 +301,8 @@ if __name__ == '__main__':
                 max_hp = 10,
                 current_mp = 10,
                 max_mp = 10,
-                wep_id = sword.id,
-                arm_id = chain.id
+                wep_id = dagger.id,
+                arm_id = rags.id
             ),
             'Test_Cleric': Char(
                 char_name = 'Test Cleric',
@@ -239,8 +317,8 @@ if __name__ == '__main__':
                 max_hp = 10,
                 current_mp = 10,
                 max_mp = 10,
-                wep_id = sword.id,
-                arm_id = chain.id
+                wep_id = dagger.id,
+                arm_id = rags.id
             ),
             'Test_Evoker': Char(
                 char_name = 'Test 1',
@@ -255,8 +333,8 @@ if __name__ == '__main__':
                 max_hp = 10,
                 current_mp = 10,
                 max_mp = 10,
-                wep_id = sword.id,
-                arm_id = chain.id
+                wep_id = dagger.id,
+                arm_id = rags.id
             ),
             'Test_Thief': Char(
                 char_name = 'Test Thief',
@@ -271,8 +349,8 @@ if __name__ == '__main__':
                 max_hp = 10,
                 current_mp = 10,
                 max_mp = 10,
-                wep_id = sword.id,
-                arm_id = chain.id
+                wep_id = dagger.id,
+                arm_id = rags.id
             )
         }
         
@@ -306,7 +384,9 @@ if __name__ == '__main__':
         inventory = Inventory(
             user_id = user1.id,
             slot_1 = sword.id,
-            slot_2 = chain.id
+            slot_2 = chain.id,
+            slot_3 = healing_pot.id,
+            slot_4 = mana_pot.id,
         )
         db.session.add(inventory)
         db.session.commit()

@@ -45,7 +45,7 @@ class UsersById(Resource):
             return make_response(jsonify({'errror': 'User not found'}), 404)
         return make_response(jsonify(user.to_dict()), 200)
     
-    def patch(self):
+    def patch(self, id):
         data = request.get_json(force=True)
         user = User.query.filter_by(id=data['id']).first()
         try:
@@ -96,7 +96,7 @@ class CharsById(Resource):
             return make_response(jsonify({'errror': 'Character not found'}), 404)
         return make_response(jsonify(char.to_dict()), 200)
     
-    def patch(self):
+    def patch(self, id):
         data = request.get_json(force=True)
         char = Char.query.filter_by(id=data['id']).first()
         try:
@@ -148,27 +148,39 @@ class Inventories(Resource):
         inventories = [inventory.to_dict() for inventory in Inventory.query.all()]
         return make_response(jsonify(inventories), 200)
     def post(self):
-        user_id = request.args.get('user_id')
+        data = request.get_json(force=True)
         try:
-            new_inventory = User(user_id = user_id)
+            new_inventory = Inventory(**data)
             db.session.add(new_inventory)
             db.session.commit()
             return make_response(jsonify(new_inventory.to_dict()), 201)
         
         except ValueError as e:
             return make_response(jsonify({'error': str(e)}), 400)
-    def patch(self):
+api.add_resource(Inventories, '/inventories')
+
+###################################################################
+
+class InventoriesById(Resource):
+    def get(self, id):
+        inventory = Inventory.query.filter_by(id=id).first()
+        if not inventory:
+            return make_response(jsonify({'errror': 'Inventory not found'}), 404)
+        return make_response(jsonify(inventory.to_dict()), 200)
+    def patch(self, id):
         data = request.get_json(force=True)
-        inventory = Inventory.query.filter_by(id=data['id']).first()
+        inventory = Inventory.query.filter_by(id=id).first()
+        print(inventory)
         try:
             for key, value in data.items():
                 setattr(inventory, key, value)
+            print(data)
             db.session.commit()
             return make_response(jsonify(inventory.to_dict()), 200)
         except ValueError as e:
             return make_response(jsonify({'error': str(e)}), 400)
-api.add_resource(Inventories, '/inventories')
-
+        
+api.add_resource(InventoriesById, '/inventories/<int:id>')
 ###################################################################
 
 class Monsters(Resource):
@@ -180,7 +192,7 @@ api.add_resource(Monsters, '/monsters')
 ###################################################################
 class Treasures(Resource):
     def get(self):
-        treasures = [treasure.to_dict() for treasure in Treasures.query.all()]
+        treasures = [treasure.to_dict() for treasure in Treasure.query.all()]
         return make_response(jsonify(treasures), 200)
 api.add_resource(Treasures, '/treasures')
 

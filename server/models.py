@@ -20,6 +20,7 @@ class User(db.Model, SerializerMixin):
     updated_at = db.Column(db.DateTime, nullable=False, default = datetime.now, onupdate=datetime.now)
     lvl = db.Column(db.Integer, default=1, nullable=False)
     xp = db.Column(db.Integer, default=0, nullable=False)
+    gold = db.Column(db.Integer, default=0)
     char_1 = db.Column(db.Integer, db.ForeignKey('chars.id'))
     char_2 = db.Column(db.Integer, db.ForeignKey('chars.id'))
     char_3 = db.Column(db.Integer, db.ForeignKey('chars.id'))
@@ -31,7 +32,7 @@ class User(db.Model, SerializerMixin):
     char4 = db.relationship('Char', foreign_keys=[char_4])
     inv = db.relationship('Inventory', backref = 'user', cascade = 'all, delete-orphan')
     
-    serialize_only = ('username', 'password', 'char1', 'char2', 'char3', 'char4', 'inv', 'lvl', 'xp', 'id',)
+    serialize_only = ('username', 'password', 'char1', 'char2', 'char3', 'char4', 'inv', 'lvl', 'xp', 'gold', 'id',)
     # serialize_rules = ('-char1.', '-char2_slot', '-char3_slot', '-char4_slot', '-inventory')
     
     @validates('username')
@@ -40,7 +41,6 @@ class User(db.Model, SerializerMixin):
             raise ValueError('Username Already Exists')
         return username
     
-        
 class Char(db.Model, SerializerMixin):
     
     __tablename__ = 'chars'
@@ -158,7 +158,7 @@ class Inventory(db.Model, SerializerMixin):
     slot_9_treasure = db.relationship('Treasure', foreign_keys=[slot_9])
     slot_10_treasure = db.relationship('Treasure', foreign_keys=[slot_10])
     
-    serialize_only = ('slot_1_treasure', 'slot_2_treasure', 'slot_3_treasure', 'slot_4_treasure', 'slot_5_treasure', 'slot_6_treasure', 'slot_7_treasure', 'slot_8_treasure', 'slot_9_treasure', 'slot_10_treasure',)
+    serialize_only = ('id','slot_1_treasure', 'slot_2_treasure', 'slot_3_treasure', 'slot_4_treasure', 'slot_5_treasure', 'slot_6_treasure', 'slot_7_treasure', 'slot_8_treasure', 'slot_9_treasure', 'slot_10_treasure',)
     
     
     # serialize_rules = ('-treasures.inventories',)
@@ -171,16 +171,17 @@ class Treasure(db.Model, SerializerMixin):
     
     name = db.Column(db.String)
     description = db.Column(db.String)
-    type = db.Column(db.String, default='wep') ##wep or arm
-    consumable_effect = db.Column(db.String, default='none') ##none, heal, clense, spell
+    type = db.Column(db.String, default='wep') ##wep or arm or consume
+    consumable_effect = db.Column(db.String, default='none') ##none, heal, clense, spell, mana
     consumable_potency = db.Column(db.Integer, default=0) ##total potency of heal if applicable
     stat_buff = db.Column(db.String, default='none') ##none, str, agi, con, mag, res, spd
     stat_potency = db.Column(db.Integer, default=1) ##total increase to stat
     reduction = db.Column(db.Boolean, default=False) ##check if damage reduction is enabled on item
     damage_reduction = db.Column(db.Integer, default=1) ##total damage reduction if applicable
-    boost = db.Column(db.Boolean, default=False) ##check if damage bonus is enabled on item
-    damage_boost = db.Column(db.Integer, default=1) ##total damage bonus if applicable
+    boost = db.Column(db.Boolean, default = False) ##check if damage bonus is enabled on item
+    damage_boost = db.Column(db.Integer, default = 1) ##total damage bonus if applicable
     level = db.Column(db.Integer, default = 1)
+    cost = db.Column(db.Integer, default = 10, nullable=False)
     
     weapons = db.relationship('Char', backref='weapon_treasure', foreign_keys=[Char.wep_id])
     armors = db.relationship('Char', backref='armor_treasure', foreign_keys=[Char.arm_id])
@@ -195,7 +196,6 @@ class Treasure(db.Model, SerializerMixin):
     inventories_slot_9 = db.relationship('Inventory', backref='treasure_slot_9', foreign_keys=[Inventory.slot_9])
     inventories_slot_10 = db.relationship('Inventory', backref='treasure_slot_10', foreign_keys=[Inventory.slot_10])
     
-    
     serialize_only = ('name', 
                     'description', 
                     'type', 
@@ -207,7 +207,9 @@ class Treasure(db.Model, SerializerMixin):
                     'damage_reduction', 
                     'boost',
                     'damage_boost',
-                    'level',)
+                    'level',
+                    'cost',
+                    'id',)
 
 class Monster(db.Model, SerializerMixin):
     
@@ -226,6 +228,7 @@ class Monster(db.Model, SerializerMixin):
     spd = db.Column(db.Integer, nullable=False)
     exp = db.Column(db.Integer, nullable=False)
     lvl = db.Column(db.Integer, nullable=False)
+    gold = db.Column(db.Integer, default=0, nullable=False)
     damage_type = db.Column(db.String, default='Physical', nullable=False) ##type of damage dealt with basic attacks
     damage_ability = db.Column(db.String, default='str', nullable=False) ##damage modified by stat
     damage_range = db.Column(db.Integer, default=1, nullable=False) ##standard range for damage calculations before modifiers
