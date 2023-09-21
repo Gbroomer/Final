@@ -1,20 +1,26 @@
 import { MyContext } from '../Context'
 import { useContext, useState, useEffect } from 'react'
-import { UNSAFE_DataRouterStateContext, useHistory } from 'react-router-dom'
+import { useHistory } from 'react-router-dom'
 import CharacterRender from '../CharacterRenders/CharacterRender'
 
 function Battlemap() {
 
-    const { user, monsters, environment, environments, consumeItem, addXp, generateMonsters, textResp, turnOrder, damageMonster, resetText, dodged, victory, damageChar } = useContext(MyContext)
+    const { user, monsters, environment, environments, consumeItem, generateMonsters, textResp, turnOrder, damageMonster, resetText, dodged, runVictory, damageChar, inspection, healChar, insufficientMana, runLoss, rest, runAway } = useContext(MyContext)
     const [combatCommand, setCombatCommand] = useState('')
+    const [abilityType, setAbilityType] = useState('')
+    const [ability, setAbility] = useState(null)
+    const [item, setItem] = useState(null)
+    const [itemType, setItemType] = useState('')
     const history = useHistory()
     const charArray = [1, 2, 3, 4]
     let xpThreshold = Math.pow(2, user.lvl)
     let xpValue = (user.xp / xpThreshold)
+    const inventorySlots = Object.keys(user.inv[0])
 
+    console.log(turnOrder)
     useEffect(() => {
         const performDamage = async () => {
-            if (Array.isArray(turnOrder) && turnOrder.length > 1 && turnOrder[0].type === 'monster') {
+            if (Array.isArray(turnOrder) && turnOrder.length > 1 && turnOrder[0].type === 'monster' && turnOrder.filter(char => char.type === 'char').length > 0 ) {
 
                 let filteredTurnOrder = turnOrder.filter(char => char.type === 'char')
                 let targetChar = Math.round(Math.floor(Math.random() * filteredTurnOrder.length))
@@ -23,24 +29,28 @@ function Battlemap() {
                 let damage_ability = turnOrder[0].damage_ability
                 console.log(filteredTurnOrder[targetChar])
                 let damageDealt = Math.round(Math.floor((Math.random() * (turnOrder[0][damage_ability] / 2)) + turnOrder[0].damage_range) - ((filteredTurnOrder[targetChar].con / 4) + filteredTurnOrder[targetChar].armor.damage_reduction))
-                console.log(damageDealt)
                 if (damageDealt <= 0) {
-                    damageDealt = 1
+                    damageDealt = Math.round(Math.floor(Math.random() * 5) + 1)
                 }
+                console.log(damageDealt)
                 const runDamage = async (damage, character) => {
                     damageChar(damage, character)
                 }
                 let dodgeChance = Math.floor(Math.random() * 200) + 1
-                if (filteredTurnOrder[targetChar].agi > dodgeChance) {
-                    dodged(targetChar, turnOrder[0], 1)
+                if (turnOrder.length > 0 && filteredTurnOrder[targetChar].agi > dodgeChance) {
+                    const targetCharacter = turnOrder.length > 0 ? turnOrder.findIndex((character) => character.id === filteredTurnOrder[targetChar].id) : null
+                    dodged(filteredTurnOrder[targetCharacter], turnOrder[0], 1)
                 } else {
                     await runDamage(damageDealt, filteredTurnOrder[targetChar])
                 }
 
+            } else if ((turnOrder.length > 0 && turnOrder.filter(monst => monst.type === 'monster')).length <= 0) {
+                setCombatCommand('victory')
+                runVictory()
+            } else if ((turnOrder.length > 0 && turnOrder.filter(char => char.type === 'char')).length <= 0) {
+                setCombatCommand('loss')
+                runLoss()
             }
-            // if ((Array.isArray(turnOrder) && turnOrder.filter(monst => monst.type === 'monster')).length <= 0) {
-            //     console.log('nice')
-            // }
         }
         const delay = 500
         const timerId = setTimeout(() => {
@@ -60,12 +70,82 @@ function Battlemap() {
         let dodgeChance = Math.floor(Math.random() * 200) + 1
         setCombatCommand("")
         if (turnOrder[targetMonster].agi > dodgeChance) {
-            dodged(targetMonster, turnOrder[0], 1)
+            dodged(turnOrder[targetMonster], turnOrder[0], 1)
         } else {
             await damageMonster(damageDealt, targetMonster)
         }
     }
 
+    const heal = async (character) => {
+        const targetChar = turnOrder.findIndex((char) => char.id === character.id)
+        const healAmount = Math.round(Math.floor((Math.random() * turnOrder[0].mag / 4) + ability.effect_power) + (turnOrder[targetChar].con / 4))
+        console.log(healAmount)
+        console.log(turnOrder[targetChar])
+        if (turnOrder[0].current_mp >= ability.cost) {
+            healChar(healAmount, ability.cost, turnOrder[targetChar])
+            setAbility(null)
+            setAbilityType('')
+        } else {
+            insufficientMana()
+        }
+        setCombatCommand('')
+    }
+
+    const inspectMonster = (monster) => {
+        const targetMonster = turnOrder.findIndex((monst) => monst.uniqueKey === monster.uniqueKey)
+        inspection(turnOrder[targetMonster])
+
+    }
+
+    // const cast = async (monster) => {
+    //     let targetChar
+    // }
+
+    const targetItem = async (target) => {
+        if (item) {
+            let targetCharKey
+            let slotKey
+            const charKeys = ['char1', 'char2', 'char3', 'char4']
+            for (const charKey of charKeys) {
+                if (user[charKey].id === target.id) {
+                    targetCharKey = charKey
+                    break
+                }
+            }
+            for (const key in user.inv[0]) {
+                if (user.inv[0][key] === item) {
+                    slotKey = key
+                    break
+                }
+            }
+
+            console.log('Item: ', item, 'target: ', targetCharKey, 'slot:', slotKey)
+            consumeItem(item, targetCharKey, slotKey)
+            setItem(null)
+            setItemType('')
+            setCombatCommand('')
+        }
+    }
+
+    const run = async () => {
+        const chars = turnOrder.filter(char => char.type === 'char')
+        const monst = turnOrder.filter(mon => mon.type === 'monster')
+        let charSpeed = 0, monSpeed = 0
+        chars.forEach(char => {
+            charSpeed += Math.floor(Math.random() * char.spd) + 1
+        })
+        monst.forEach(mon => {
+            monSpeed += Math.floor(Math.random() * mon.spd) + 1
+        })
+        console.log(charSpeed, monSpeed)
+        if (charSpeed >= monSpeed) {
+            runAway(charSpeed, monSpeed)
+            setCombatCommand('victory')
+        } else {
+            setCombatCommand('')
+            runAway(charSpeed, monSpeed)
+        }
+    }
     return (
         <div>
             <div className='rpg-box'>
@@ -90,67 +170,180 @@ function Battlemap() {
                     <div className='rpg-box' style={{ maxHeight: '750px', overflow: 'auto', display: 'flex', flexWrap: 'wrap', justifyContent: "center" }}>
                         <div className='rpg-box' style={{ position: 'relative', display: 'flex', minWidth: '50px', flex: '1', textAlign: 'center', alignItems: 'flex-start' }}>
                             <div className='rpg-box' style={{ flex: '0.5', height: '100%' }}>
-                                <h1>{turnOrder.length > 1 && turnOrder[0].char_name ? turnOrder[0].char_name : turnOrder[0].name}'s Turn</h1>
-                                <br />
-                                {turnOrder[0].name ? (
-                                    <></>
+                                {(combatCommand !== 'victory' && combatCommand !== 'loss') ? (
+                                    <>
+                                        <h1>{turnOrder.length > 0 && turnOrder[0].char_name ? turnOrder[0].char_name : 'Enemy'}'s Turn</h1>
+                                        <br />
+                                        {turnOrder.length > 0 && turnOrder[0].name ? (
+                                            <></>
+                                        ) : (
+                                            //combatCommands Buttons
+                                            <>
+                                                <h2 className='rpg-button' onClick={() => {
+                                                    resetText()
+                                                    setAbility(null)
+                                                    setAbilityType('')
+                                                    setItem(null)
+                                                    setItemType('')
+                                                    setCombatCommand('attack')
+                                                }}>Attack</h2>
+                                                <br />
+                                                <h2 className='rpg-button' onClick={() => {
+                                                    resetText()
+                                                    setAbility(null)
+                                                    setAbilityType('')
+                                                    setItem(null)
+                                                    setItemType('')
+                                                    setCombatCommand('abilities')
+                                                }}>Abilites</h2>
+                                                <br />
+                                                <h2 className='rpg-button' onClick={() => {
+                                                    resetText()
+                                                    setAbility(null)
+                                                    setAbilityType('')
+                                                    setItem(null)
+                                                    setItemType('')
+                                                    setCombatCommand('items')
+                                                }}>Items</h2>
+                                                <br />
+                                                <h2 className='rpg-button' onClick={() => {
+                                                    resetText()
+                                                    setAbility(null)
+                                                    setAbilityType('')
+                                                    setItem(null)
+                                                    setItemType('')
+                                                    setCombatCommand('inspect')
+                                                }}>Inspect</h2>
+                                                <br />
+                                                <h2 className='rpg-button' onClick={() => {
+                                                    resetText()
+                                                    setAbility(null)
+                                                    setAbilityType('')
+                                                    setItem(null)
+                                                    setItemType('')
+                                                    setCombatCommand('run')
+                                                }}>Run</h2>
+                                            </>
+                                        )}
+                                    </>
                                 ) : (
                                     <>
-                                        <h2 className='rpg-button' onClick={() => {
-                                            resetText()
-                                            console.log(turnOrder)
-                                            setCombatCommand('attack')
-                                        }}>Attack</h2>
-                                        <br />
-                                        <h2 className='rpg-button' onClick={() => {
-                                            resetText()
-                                            setCombatCommand('abilities')
-                                        }}>Abilites</h2>
-                                        <br />
-                                        <h2 className='rpg-button' onClick={() => {
-                                            resetText()
-                                            setCombatCommand('items')
-                                        }}>Items</h2>
-                                        <br />
-                                        <h2 className='rpg-button' onClick={() => {
-                                            resetText()
-                                            setCombatCommand('inspect')
-                                        }}>Inspect</h2>
-                                        <br />
-                                        <h2 className='rpg-button' onClick={() => {
-                                            resetText()
-                                            setCombatCommand('run')
-                                        }}>Run</h2>
+                                    {combatCommand === 'victory' ? (
+                                        <>
+                                        <h1 className='rpg-button' style ={{fontSize: '20px'}} onClick={()=> history.push('/main')}> Return To Town</h1>
+                                        </>
+                                    ) : (
+                                        <>
+                                        <h1 className='rpg-button' style ={{fontSize: '20px'}} onClick={()=> {
+                                            rest(0)
+                                            history.push('/main')}}> Return To Town</h1>
+                                        </>
+                                    )}
                                     </>
                                 )}
                             </div>
-                            {combatCommand !== "" ?
+                            {combatCommand !== "victory" || combatCommand !== '' ?
                                 (
                                     <div className='rpg-box' style={{ flex: '0.5', height: '100%' }}>
-                                        {combatCommand === 'attack' ? (
+                                        {combatCommand === 'attack' && (
                                             <>
                                                 <h3>Attack Which Target: </h3>
                                                 <br />
 
-                                                {turnOrder.length > 1 && (turnOrder
+                                                {turnOrder.length > 0 && (turnOrder
                                                     .filter(monst => monst.type === 'monster')
                                                     .map((monster, index) => (
                                                         <div key={index}>
-                                                            <h3 className='rpg-button' onClick={() => attack(monster)}>{`${monster.name} ${index + 1}`}</h3>
+                                                            <h3 className='rpg-button' onClick={() => attack(monster)}>{`${monster.name} ${monster.uniqueKey}`}</h3>
                                                         </div>
                                                     )))}
                                             </>
-                                        ) : combatCommand === 'abilities' ? (
+                                        )}
+                                        {combatCommand === 'abilities' && (
                                             <>
-
+                                                {abilityType === '' && (
+                                                    <>
+                                                        <h3>Use Which Ability: </h3>
+                                                        {turnOrder.length > 0 && turnOrder[0].character_class.abilities.length > 0 && (turnOrder[0].character_class.abilities
+                                                            .map((ability, index) => (
+                                                                <div key={index}>
+                                                                    <h3 className='rpg-button' onClick={() => {
+                                                                        setAbility(ability.ability)
+                                                                        setAbilityType(`${ability.ability.effect_version}`)
+                                                                    }}>{`${ability.ability.name}`}: {ability.ability.cost}mp</h3>
+                                                                </div>
+                                                            )))}
+                                                    </>
+                                                )}
+                                                {abilityType === 'Heal' && (
+                                                    <>
+                                                        <h3>Use {ability.name} On Who: </h3>
+                                                        {turnOrder.length > 0 && (turnOrder
+                                                            .filter(char => char.type === 'char')
+                                                            .map((character, index) => (
+                                                                <div key={index}>
+                                                                    <h3 className='rpg-button' onClick={() => heal(character)}>{character.char_name}</h3>
+                                                                </div>
+                                                            )))}
+                                                    </>
+                                                )}
                                             </>
-                                        ) : combatCommand === 'items' ? (
+                                        )}
+                                        {combatCommand === 'items' && (
                                             <>
-
+                                                {itemType === '' && (
+                                                    <>
+                                                        <h3>{inventorySlots
+                                                            .filter(key => key.startsWith('slot_') && user.inv[0][key] !== null && user.inv[0][key].type === 'consume')
+                                                            .map(key => user.inv[0][key]).length > 0 ? 'Use Which Item:' : 'No Consumables in Inventory'}</h3>
+                                                        <br />
+                                                        {turnOrder.length > 0 && (inventorySlots
+                                                            .filter(key => key.startsWith('slot_') && user.inv[0][key] !== null && user.inv[0][key].type === 'consume')
+                                                            .map(key => user.inv[0][key])
+                                                            .map((item, index) => (
+                                                                <div key={index}>
+                                                                    <h3 className='rpg-button' onClick={() => {
+                                                                        setItem(item)
+                                                                        setItemType(item.consumable_effect)
+                                                                    }}>{item.name}</h3>
+                                                                </div>
+                                                            )))}
+                                                    </>
+                                                )}
+                                                {(itemType === 'heal' || itemType === 'mana') && (
+                                                    <>
+                                                        <h3>Use {item.name} On Who:</h3>
+                                                        {turnOrder.length > 0 && (turnOrder
+                                                            .filter(char => char.type === 'char')
+                                                            .map((character, index) => (
+                                                                <div key={index}>
+                                                                    <h3 className='rpg-button' onClick={() => targetItem(character)}>{character.char_name}</h3>
+                                                                </div>
+                                                            )))}
+                                                    </>
+                                                )}
                                             </>
-                                        ) : combatCommand === 'run' && (
+                                        )}
+                                        {combatCommand === 'run' && (
                                             <>
-
+                                                <h3>Are You Sure?</h3>
+                                                <br />
+                                                <h3 className='rpg-button'onClick={() => {
+                                                    run()}}>Yes</h3>
+                                                <h3 className='rpg-button' onClick={() => setCombatCommand('')}>No</h3>
+                                            </>
+                                        )}
+                                        {combatCommand === 'inspect' && (
+                                            <>
+                                                <h3>Which Monster Would you Like to Inspect? </h3>
+                                                <br />
+                                                {turnOrder.length > 0 && (turnOrder
+                                                    .filter(monst => monst.type === 'monster')
+                                                    .map((monster, index) => (
+                                                        <div key={index}>
+                                                            <h3 className='rpg-button' onClick={() => inspectMonster(monster)}>{`${monster.name} ${monster.uniqueKey}`}</h3>
+                                                        </div>
+                                                    )))}
                                             </>
                                         )}
                                     </div>
@@ -160,16 +353,17 @@ function Battlemap() {
                                 )}
                         </div>
                         <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', minWidth: '1000px', flexDirection: 'column' }}>
-                            <div className='rpg-title-box' style={{ position: 'absolute', top: '0', left: '50%', transform: 'translateX(-50%)', zIndex: 1, width: '100%' }}>
-                                {textResp.length > 0 && (
-                                    textResp.map((text, index) => (
+                            {textResp.length > 0 && (
+                                <div className='rpg-title-box' style={{ position: 'absolute', top: '0', left: '50%', transform: 'translateX(-50%)', zIndex: 1, width: '100%' }}>
+                                    {textResp.map((text, index) => (
                                         <div key={index}>
                                             <h3>{text}</h3>
                                         </div>
-                                    )))}
-                            </div>
+                                    ))}
+                                </div>
+                            )}
                             <img src={environment.img_url} alt={`A ${environment.name}`} className='rpg-img'></img>
-                            {turnOrder.length > 1 && (turnOrder
+                            {turnOrder.length > 0 && (turnOrder
                                 .filter(monst => monst.type === 'monster')
                                 .map((monster, index) => (
                                     <div key={index} style={{ position: 'absolute', top: `25%`, left: `50%`, transform: `translate( -50%, 0) translateX(${(index - Math.floor(monsters.length / 2)) * 90}%)`, width: '20%', textAlign: 'center' }}>
@@ -180,7 +374,7 @@ function Battlemap() {
                         </div>
                     </div>
                     <div className='rpg-box'>
-                        <button className='rpg-button' onClick={() => history.push('/main')}>back</button>
+                        <button className='rpg-button' onClick={() => history.push('/main')}>Cheat Return</button>
                     </div>
                 </div>
             ) : (

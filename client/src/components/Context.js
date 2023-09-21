@@ -74,17 +74,16 @@ const MyContextProvider = ({ children }) => {
                 const updatedTurnOrder = [...turnOrder]
                 const targetMonster = updatedTurnOrder[monster]
                 const tempArray = [...textResp]
-                let levelUpOccured
-                let updatedUser = {...user}
+                let updatedUser = { ...user }
                 if (targetMonster && targetMonster.hp > 0) {
 
                     targetMonster.hp -= damage
                     tempArray.push(`${turnOrder[0].char_name} dealt ${damage} to the target ${targetMonster.name}!`)
                     if (targetMonster.hp <= 0) {
                         tempArray.push(`The target ${targetMonster.name} died!`)
-                        await addXp(targetMonster.exp, targetMonster.gold, updatedUser, levelUpOccured)
+                        await addXp(targetMonster.exp, targetMonster.gold, updatedUser)
                         tempArray.push(`You gained ${targetMonster.exp}xp and ${targetMonster.gold} gold!`)
-                        if(levelUpOccured) {
+                        if ((user.xp + targetMonster.exp) >= xpThreshold(user.lvl)) {
                             tempArray.push(`Your party has leveled up!`)
                         }
                         updatedTurnOrder.splice(monster, 1)
@@ -106,7 +105,7 @@ const MyContextProvider = ({ children }) => {
 
     const damageChar = async (damage, character) => {
         return new Promise(async (resolve) => {
-            const updatedUser  = {...user}
+            const updatedUser = { ...user }
             const updatedTurnOrder = [...turnOrder]
             const tempArray = [...textResp]
             for (let i = 1; i < 5; i++) {
@@ -132,22 +131,101 @@ const MyContextProvider = ({ children }) => {
         })
     }
 
-    const dodged = (dodger, attacker, attacks) =>{
+    const healChar = async (heal, cost, character) => {
+        return new Promise(async (resolve) => {
+            const updatedUser = { ...user }
+            const updatedTurnOrder = [...turnOrder]
+            const tempArray = [...textResp]
+            for (let i = 1; i < 5; i++) {
+                if (user[`char${i}`].id === turnOrder[0].id) {
+                    updatedUser[`char${i}`].current_mp -= cost
+                }
+            }
+            for (let i = 1; i < 5; i++) {
+                if (user[`char${i}`].id === character.id) {
+                    updatedUser[`char${i}`].current_hp += heal
+                    tempArray.push(`${turnOrder[0].char_name} healed ${turnOrder[0].char_name} for ${heal}!`)
+                    if (updatedUser[`char${i}`].current_hp > updatedUser[`char${i}`].max_hp) {
+                        updatedUser[`char${i}`].current_hp = updatedUser[`char${i}`].max_hp
+                    }
+                    break
+                }
+            }
+            const firstEntity = updatedTurnOrder.shift()
+            updatedTurnOrder.push(firstEntity)
+            setUser(updatedUser)
+            setTextResp(tempArray)
+            setTurnOrder(updatedTurnOrder)
+        })
+    }
+
+    const insufficientMana = async () => {
+        const tempArray = [...textResp]
+        tempArray.push(`Insufficient MP`)
+        setTextResp(tempArray)
+    }
+
+    const dodged = (dodger, attacker, attacks) => {
         const tempArray = [...textResp]
         const updatedTurnOrder = [...turnOrder]
-        tempArray.push([`The ${turnOrder[dodger].name ? turnOrder[dodger].name : turnOrder[dodger].char_name} dodged an attack from ${attacker.name ? attacker.name : attacker.char_name}!`])
+        const dodgerName = dodger ? (dodger.name || dodger.char_name) : "Unknown"
+        const attackerName = attacker ? (attacker.name || attacker.char_name) : "Unknown"
+        tempArray.push([`${dodgerName} dodged an attack from ${attackerName}!`])
         setTextResp(tempArray)
         if (attacks === 1) {
             const firstEntity = updatedTurnOrder.shift()
             updatedTurnOrder.push(firstEntity)
-            setTurnOrder(firstEntity)
+            setTurnOrder(updatedTurnOrder)
         }
     }
-    
-    const victory = () => {
-        console.log('nice')
+
+    const runVictory = () => {
+        const tempArray = [...textResp]
+        tempArray.push(`You have defeated the Enemies!`)
+        setTextResp(tempArray)
     }
 
+    const runLoss = () => {
+        const tempArray = [...textResp]
+        tempArray.push(`You have been defeated!`)
+        setTextResp(tempArray)
+    }
+
+    const runAway = (charSpeed, monSpeed) => {
+        const tempArray = [...textResp]
+        const updatedTurnOrder = [...turnOrder]
+        if (charSpeed >= monSpeed) {
+            tempArray.push(`You have successfully escaped the fight!`)
+            setTextResp(tempArray)
+        } else {
+            tempArray.push(`You have failed to escape the fight!`)
+            setTextResp(tempArray)
+            const firstEntity = updatedTurnOrder.shift()
+            updatedTurnOrder.push(firstEntity)
+            setTurnOrder(updatedTurnOrder)
+        }
+    }
+
+    const inspection = (monster) => {
+        const tempArray = [...textResp]
+        const monsterOriginal = monsters.findIndex(monst => monst.id === monster.id)
+        console.log(monsterOriginal)
+        const monsterHpStatus = monster.hp / monsters[monsterOriginal].hp
+        console.log(monsterHpStatus)
+        if (monsterHpStatus <= 0.25) {
+            tempArray.push(`${monster.name} is near death!`)
+        } else if (monsterHpStatus <= 0.5) {
+            tempArray.push(`${monster.name} is very hurt!`)
+        } else if (monsterHpStatus <= 0.75) {
+            tempArray.push(`${monster.name} is injured!`)
+        } else if (0.75 < monsterHpStatus < 1) {
+            tempArray.push(`${monster.name} is barely hurt!`)
+        } else if (monsterHpStatus === 1) {
+            tempArray.push(`${monster.name} is unharmed!`)
+        }
+        console.log(tempArray)
+        setTextResp(tempArray)
+    }
     const resetText = async () => {
         setTextResp([])
     }
@@ -195,27 +273,27 @@ const MyContextProvider = ({ children }) => {
     }
 
     const levelUpCharacter = (updatedUser, characterIndex) => {
-        
-            const character = updatedUser[`char${characterIndex}`]
-            // console.log(character.character_class)
-            const updatedCharacter = {
-                ...character,
-                // current_hp: character.character_class.hp_growth + character.current_hp,
-                // current_mp: character.character_class.mp_growth + character.current_mp,
-                max_hp: character.character_class.hp_growth + character.max_hp,
-                max_mp: character.character_class.mp_growth + character.max_mp,
-                str: character.character_class.str_growth + character.str,
-                agi: character.character_class.agi_growth + character.agi,
-                con: character.character_class.con_growth + character.con,
-                mag: character.character_class.mag_growth + character.mag,
-                res: character.character_class.res_growth + character.res,
-                spd: character.character_class.spd_growth + character.spd,
-            }
-            updatedUser[`char${characterIndex}`] = updatedCharacter
-            return updatedUser
+
+        const character = updatedUser[`char${characterIndex}`]
+        // console.log(character.character_class)
+        const updatedCharacter = {
+            ...character,
+            current_hp: character.current_hp <= 0 ? 0 : character.character_class.hp_growth + character.current_hp,
+            current_mp: character.character_class.mp_growth + character.current_mp,
+            max_hp: character.character_class.hp_growth + character.max_hp,
+            max_mp: character.character_class.mp_growth + character.max_mp,
+            str: character.character_class.str_growth + character.str,
+            agi: character.character_class.agi_growth + character.agi,
+            con: character.character_class.con_growth + character.con,
+            mag: character.character_class.mag_growth + character.mag,
+            res: character.character_class.res_growth + character.res,
+            spd: character.character_class.spd_growth + character.spd,
+        }
+        updatedUser[`char${characterIndex}`] = updatedCharacter
+        return updatedUser
     }
 
-    const addXp = async (xpGain, goldGain, updatedUser, levelUpOccured) => {
+    const addXp = async (xpGain, goldGain, updatedUser) => {
         return new Promise(resolve => {
             updatedUser.xp += xpGain;
             updatedUser.gold += goldGain
@@ -226,13 +304,10 @@ const MyContextProvider = ({ children }) => {
                 indexArray.map(index => {
                     levelUpCharacter(updatedUser, index)
                 })
-                levelUpOccured = true;
             }
-            // setUser(updatedUser)
-            resolve(levelUpOccured, updatedUser)
+            resolve(updatedUser)
         })
     }
-
 
     const equip = (item, character, slot) => {
         const updatedUser = { ...user }
@@ -255,24 +330,38 @@ const MyContextProvider = ({ children }) => {
         return Math.pow(2, level)
     }
 
-    const consumeItem = (item, character, slot) => {
-        const updatedUser = { ...user }
-        const characterObj = updatedUser[character]
-
-        if (item.consumable_effect === 'heal') {
+    const consumeItem = async (item, character, slot) => {
+        return new Promise((resolve) => {
+            const updatedUser = { ...user }
+            const characterObj = updatedUser[character]
+            const tempArray = [...textResp]
             const healAmount = Math.round(Math.floor(
                 Math.random() * (item.consumable_potency) + 1
             ) + (0.25 * characterObj.con))
-            characterObj.current_hp + healAmount > characterObj.max_hp ? characterObj.current_hp = characterObj.max_hp : characterObj.current_hp += healAmount
-        }
-        if (item.consumable_effect === 'mana') {
             const restoreAmount = Math.round(Math.floor(
                 Math.random() * (item.consumable_potency) + 1
-            ) + (0.25 * characterObj.con))
-            characterObj.current_mp + restoreAmount > characterObj.max_mp ? characterObj.current_mp = characterObj.max_mp : characterObj.current_mp += restoreAmount
-        }
-        updatedUser.inv[0][slot] = null
-        setUser(updatedUser)
+            ) + (0.25 * characterObj.res))
+
+            if (item.consumable_effect === 'heal') {
+                characterObj.current_hp + healAmount > characterObj.max_hp ? characterObj.current_hp = characterObj.max_hp : characterObj.current_hp += healAmount
+                tempArray.push(`${item.name} healed ${characterObj.char_name} for ${healAmount}!`)
+            }
+            if (item.consumable_effect === 'mana') {
+                characterObj.current_mp + restoreAmount > characterObj.max_mp ? characterObj.current_mp = characterObj.max_mp : characterObj.current_mp += restoreAmount
+                tempArray.push(`${item.name} restored Mp to ${characterObj.char_name} for ${restoreAmount}!`)
+            }
+            updatedUser.inv[0][slot] = null
+            setUser(updatedUser)
+
+            if (turnOrder.length > 0) {
+                const updatedTurnOrder = [...turnOrder]
+                const firstEntity = updatedTurnOrder.shift()
+                updatedTurnOrder.push(firstEntity)
+                setTextResp(tempArray)
+                setTurnOrder(updatedTurnOrder)
+            }
+
+        })
     }
 
     const sell = (item, slot) => {
@@ -312,8 +401,13 @@ const MyContextProvider = ({ children }) => {
             damageMonster,
             resetText,
             dodged,
-            victory,
             damageChar,
+            inspection,
+            healChar,
+            insufficientMana,
+            runVictory,
+            runLoss,
+            runAway,
         }}>
             {children}
         </MyContext.Provider>
