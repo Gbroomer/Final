@@ -4,6 +4,8 @@ import MyContextProvider from './Context'
 import Opener from "./Front_Page/Opener"
 import Character_Creator from "./Front_Page/Character_Creator"
 import Main from "./Main_Page/Main"
+import Battlemap from './BattleMap/Battlemap'
+import About from './About/About'
 
 function App() {
   return (
@@ -17,6 +19,12 @@ function App() {
         </Route>
         <Route exact path='/Main'>
           <Main />
+        </Route>
+        <Route exact path='/Battlemap'>
+          <Battlemap />
+        </Route>
+        <Route exact path='/About'>
+          <About />
         </Route>
       </Switch>
     </MyContextProvider>

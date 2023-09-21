@@ -57,6 +57,8 @@ class Char(db.Model, SerializerMixin):
     current_hp = db.Column(db.Integer, nullable=False)
     max_hp = db.Column(db.Integer, nullable=False)
     current_mp = db.Column(db.Integer, nullable=False)
+    status = db.Column(db.String, default= 'none')
+    type = db.Column(db.String, default='char')
     max_mp = db.Column(db.Integer, nullable=False)
     wep_id = db.Column(db.Integer, db.ForeignKey('treasures.id'), nullable = False)
     arm_id = db.Column(db.Integer, db.ForeignKey('treasures.id'), nullable = False)
@@ -69,7 +71,7 @@ class Char(db.Model, SerializerMixin):
     armor = db.relationship('Treasure', foreign_keys=[arm_id], )
     character_class = db.relationship('Class', foreign_keys=[char_class],)
     
-    serialize_only = ('char_name', 'character_class', 'str', 'agi', 'con', 'mag', 'res', 'spd', 'current_hp', 'max_hp', 'current_mp', 'max_mp', 'weapon', 'armor', 'id',)
+    serialize_only = ('char_name', 'type', 'character_class', 'str', 'agi', 'con', 'mag', 'res', 'spd', 'current_hp', 'max_hp', 'current_mp', 'max_mp', 'weapon', 'armor', 'id',)
     # serialize_rules = ('-char1_slot.char1_slot', '-char2_slot.char2_slot', '-char3_slot.char3_slot', '-char4_slot.char4_slot',)
     # serialize_rules = ('-weapon_treasure.weapon_chars', '-treasure.armor_chars', '-char1_slot', '-char2_slot', '-char3_slot',)
 
@@ -219,6 +221,7 @@ class Monster(db.Model, SerializerMixin):
     name = db.Column(db.String)
     img_url = db.Column(db.String)
     hp = db.Column(db.Integer, nullable=False)
+    type = db.Column(db.String, default='monster')
     mp = db.Column(db.Integer, nullable=False)
     str = db.Column(db.Integer, nullable=False)
     agi = db.Column(db.Integer, nullable=False)

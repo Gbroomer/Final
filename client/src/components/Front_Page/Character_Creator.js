@@ -10,7 +10,6 @@ function Character_Creator() {
     const [classes, setClasses] = useState([])
     const [confirm, setConfirm] = useState(false)
     const history = useHistory()
-    // console.log(user)
 
     useEffect(() => {
         async function fetchData() {
@@ -81,6 +80,7 @@ function Character_Creator() {
                 char_2: responses[1].id,
                 char_3: responses[2].id,
                 char_4: responses[3].id,
+                gold: 25,
             }
             try {
                 const resp = await fetch('http://127.0.0.1:5555/users', {

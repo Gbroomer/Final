@@ -240,6 +240,7 @@ if __name__ == '__main__':
                 spd = 16,
                 exp = 1,
                 lvl = 1,
+                gold = 8,
                 damage_type = 'Physical',
                 damage_ability = 'agi',
                 damage_range = 6

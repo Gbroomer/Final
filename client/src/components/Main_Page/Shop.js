@@ -65,7 +65,7 @@ function Shop() {
                         .filter(key => key.startsWith('slot_') && user.inv[0][key] !== null)
                         .map(key => user.inv[0][key])
                         .map((treasure, index) => (
-                            <div key={index} className='rpg-box' style={{ flex: '1' }}>
+                            <div key={index} className='rpg-box' style={{ flex: '1', display: 'flex', flexDirection: 'column' }}>
                                 <br />
                                 <h3>Name: {treasure.name}</h3>
                                 <br />
@@ -76,18 +76,21 @@ function Shop() {
                                 <h4>{treasure.type === 'wep' ? `Damage Boost: ${treasure.damage_boost}` : treasure.type === 'arm' ? `Damage Reduction: ${treasure.damage_reduction}` : `Max Restore:  ${treasure.consumable_potency}`}</h4>
                                 <br />
                                 <br />
-                                <button className='rpg-button' onClick={() => sellItem(treasure)}>Sell?</button>
+                                <button className='rpg-button' style={{fontSize: "18px", display: 'flex', flexDirection: 'column', marginTop: 'auto' }} onClick={() => sellItem(treasure)}>Sell?</button>
                             </div>
                         ))}
                 </div>
             ) : (
                 <div style={{ display: 'flex' }}>
                     {treasures.map(treasure => (
-                        <div key={treasures.indexOf(treasure)} className='rpg-box' style={{ flex: '1' }}>
+                        <div key={treasures.indexOf(treasure)} className='rpg-box' style={{ flex: '1', display: 'flex', flexDirection: 'column'}}>
                             <br />
-                            <h4>Name: {treasure.name}</h4>
+                            <h3>Name: {treasure.name}</h3>
+                            <br />
                             <h4>Type: {treasure.type}</h4>
+                            <br />
                             <h4>Cost: {treasure.cost}g</h4>
+                            <br />
                             <h4>
                                 {treasure.type === 'wep'
                                     ? `Damage Boost: ${treasure.damage_boost}`
@@ -102,7 +105,7 @@ function Shop() {
                                 <>
                                     {inventoryFull === false ? (
                                         <>
-                                            <button className='rpg-button' onClick={() => purchaseItem(treasure)}>Purchase</button>
+                                            <button className='rpg-button' style={{fontSize: "18px", display: 'flex', flexDirection: 'column', marginTop: 'auto' }} onClick={() => purchaseItem(treasure)}>Purchase</button>
                                         </>
                                     ) : (
                                         <>

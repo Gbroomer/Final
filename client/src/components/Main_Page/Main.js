@@ -2,14 +2,15 @@ import { MyContext } from '../Context'
 import CharacterRender from '../CharacterRenders/CharacterRender'
 import { useContext, useState } from 'react'
 import Inventory from './Inventory'
+import { useHistory } from 'react-router-dom'
 import Shop from './Shop'
 
 function Main() {
 
-    const { user, addXp, rest, equip } = useContext(MyContext)
+    const { user, addXp, rest, equip, setBattleMaps, environments, resetBattle } = useContext(MyContext)
     const [choice, setChoice] = useState("")
     const [ notEnough, setNotEnough ] = useState(false)
-    
+    const history = useHistory()
     const charArray = [1, 2, 3, 4]
     const restCost = (user.lvl * 5)
 
@@ -112,6 +113,28 @@ function Main() {
         )
     }
 
+    const battleInit = async () => {
+        resetBattle()
+        if(environments) {
+            history.push('/battlemap')
+        }
+        try {
+            const response = await fetch('http://127.0.0.1:5555/environments')
+            const environs = await response.json()
+            console.log(environs)
+            setBattleMaps(environs)
+            history.push('/battlemap')
+        } catch (error) {
+            console.log("Error Fetching Monsters: ", error)
+        }
+    }
+
+    const cheat = () => {
+        let updatedUser = {...user}
+        let levelUpOccured
+        addXp(25, 50, updatedUser, levelUpOccured)
+    }
+
     return (
         <div>
             <div className='rpg-box'>
@@ -132,22 +155,20 @@ function Main() {
                 </div>
             </div>
             {choice === "" && (
-                <div className='centered-menu rpg-box'>
-                    <button className='rpg-button'>Venture Forth</button>
-                    <button className='rpg-button' onClick={() => setChoice("inventory")}>Inventory</button>
-                    <button className='rpg-button' onClick={() => setChoice("shop")}>Shop</button>
-                    <button className='rpg-button' onClick={() => setChoice('rest')}>Rest</button>
-                    <button className='rpg-button' onClick={saveGame}>Save</button>
-                    <button className='rpg-button' onClick={() => addXp(25, 50)}>Cheat</button>
+                <div className='centered-menu rpg-box' >
+                    <button className='rpg-button rpg-text-options' onClick={() => battleInit()}>Venture Forth</button>
+                    <button className='rpg-button rpg-text-options' onClick={() => setChoice("inventory")}>Inventory</button>
+                    <button className='rpg-button rpg-text-options' onClick={() => setChoice("shop")}>Shop</button>
+                    <button className='rpg-button rpg-text-options' onClick={() => setChoice('rest')}>Rest</button>
+                    <button className='rpg-button rpg-text-options' onClick={saveGame}>Save</button>
+                    <button className='rpg-button rpg-text-options' onClick={() => cheat()}>Cheat</button>
+                    <button className='rpg-button rpg-text-options' onClick={() => history.push('/About')}>About</button>
                 </div>
-            )}
-            {choice === "venture" && (
-                <div></div>
             )}
             {choice === "inventory" && (
                 <div>
                     <Inventory />
-                    <div className='rpg-box centered-menu'>
+                    <div className='rpg-box back-button'>
                         <h2 className='rpg-button' onClick={resetChoice}>Go Back</h2>
                     </div>
                 </div>
@@ -155,27 +176,28 @@ function Main() {
             {choice === "shop" && (
                 <div>
                     <Shop />
-                    <div className='rpg-box centered-menu'>
+                    <div className='rpg-box back-button'>
                         <h2 className='rpg-button' onClick={resetChoice}>Go Back</h2>
                     </div>
                 </div>
             )}
             {choice === "rest" && (
-                <div className='rpg-box centered-menu'>
-                    <h4>Spend {restCost} to rest for the day? </h4>
+                <div className='rpg-box rest-button'>
+                    <h2>Spend {restCost} to rest for the day? </h2>
                     <br />
                     {notEnough  ? (
-                        <h4>You don't have enough Money!</h4>
+                        <h2>You don't have enough Money!</h2>
                     ) : (
-                        <button className='rpg-button' onClick={longRest}>Yes</button>
+                        <h2 className='rpg-button' style = {{fontSize: '25px'}} onClick={longRest}>Yes</h2>
                     )}
-                    <button className='rpg-button' onClick={resetChoice}>{notEnough ? "Crap" : "No"}</button>
+                    <h2 className='rpg-button' style = {{fontSize: '25px'}} onClick={resetChoice}>{notEnough ? "Crap" : "No"}</h2>
                 </div>
             )}
             {choice === "save" && (
-                <div className='rpg-box centered-menu'>
+                <div className='rpg-box back-button' style={{minWidth: '200px', minHeight: '200px', textAlign: 'center'}}>
                     <h2>Game Saved Successfully!</h2>
-                    <button className='rpg-button' onClick={resetChoice}>Ok</button>
+                    <br />
+                    <button className='rpg-button' style={{fontSize: '20px'}} onClick={resetChoice}>Ok</button>
                 </div>
             )}
             {choice === "About" && (

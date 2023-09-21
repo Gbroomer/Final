@@ -67,7 +67,7 @@ function Opener() {
     })
 
     return (
-        <div className='rpg-box rpg-nav'>
+        <div className='rpg-box rpg-nav start-menu'>
             {signUp ? (
                 <div>
                     <form onSubmit={formik.handleSubmit}>
@@ -77,14 +77,17 @@ function Opener() {
                         <label className='rpg-c-accent'>Password</label>
                         <input className = 'rpg-textbox' type="password" placeholder='Password' name='password' onChange={formik.handleChange} value={formik.values.password}></input>
                         <p className = 'rpg-c-dark'>{formik.errors.password}</p>
-                        <button className = 'rpg-button' type='submit'>Submit</button>
+                        <button className = 'rpg-button'  style={{margin: '15px', fontWeight: 'bold', fontSize: '20px'}} type='submit'>Submit</button>
+                        <button className = 'rpg-button'  style={{margin: '15px',fontWeight: 'bold', fontSize: '20px'}} onClick={() => {
+                            setSignUp(false)
+                            setLoggingIn(false)}}>Cancel</button>
                     </form>
                 </div>
             ) : (
                 <>
                     <ul>
-                        <button className='rpg-nav-item rpg-button' onClick={() => {setSignUp(true)}}>New Game</button>
-                        <button className='rpg-nav-item rpg-button' onClick={() => {
+                        <button className='rpg-nav-item rpg-button' style={{margin: '15px', marginLeft: '35px', fontWeight: 'bold', fontSize: '20px'}} onClick={() => {setSignUp(true)}}>New Game</button>
+                        <button className='rpg-nav-item rpg-button' style={{margin: '15px', marginLeft: '35px', fontWeight: 'bold', fontSize: '20px'}} onClick={() => {
                             setSignUp(true)
                             setLoggingIn(true)
                             } }>Load Save</button>
