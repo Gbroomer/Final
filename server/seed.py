@@ -208,6 +208,50 @@ if __name__ == '__main__':
                 damaging = False,
                 level_req = 1
             ),
+            'fireBolt': Ability(
+                name = 'Firebolt',
+                cost = 5,
+                effect_version = 'Spell',
+                damaging = True,
+                damage_type = 'Magical',
+                damage_range = 1,
+                damage_ability = 'mag',
+                damage_bonus = 5,
+                level_req = 1
+            ),
+            'pound': Ability(
+                name = 'Pound',
+                cost = 6,
+                status_effect = True,
+                effect_hostile = True,
+                effect_version = 'Stun',
+                effect_type = 'Physical',
+                effect_ability = 'str',
+                effect_power = 3,
+                damaging = True,
+                damage_type = 'Physical',
+                damage_range = 1,
+                damage_ability = 'str',
+                damage_bonus = 8,
+                level_req = 1,
+            ),
+            'garrote': Ability(
+                name = 'garrote',
+                cost = 5,
+                status_effect = True,
+                effect_hostile = True,
+                effect_version = 'Bleed',
+                effect_type = 'Physical',
+                effect_power = 5,
+                effect_ability = 'agi',
+                effect_duration = 2,
+                damaging = True,
+                damage_type = 'Physical',
+                damage_range = 1,
+                damage_ability = 'agi',
+                damage_bonus = 5,
+                level_req = 1,
+            ),
         }
         
         db.session.add_all(list(abilities.values()))
@@ -220,6 +264,18 @@ if __name__ == '__main__':
                 class_id = cleric.id,
                 ability_id = ability_list[0].id
             ),
+            'evoker_firebolt': Class_Ability_Association(
+                class_id = evoker.id,
+                ability_id = ability_list[1].id
+            ),
+            'barbarian_pound': Class_Ability_Association(
+                class_id = barbarian.id,
+                ability_id = ability_list[2].id
+            ),
+            'thief_garrote': Class_Ability_Association(
+                class_id = thief.id,
+                ability_id = ability_list[3].id
+            )
         }
         
         db.session.add_all(list(ability_associations.values()))
@@ -230,7 +286,7 @@ if __name__ == '__main__':
             'goblin': Monster(
                 name = 'Goblin',
                 img_url = "https://www.dndbeyond.com/avatars/thumbnails/30783/955/1000/1000/638062024584880857.png",
-                hp = 15,
+                hp = 10,
                 mp = 10,
                 str = 12,
                 agi = 17,
@@ -245,6 +301,114 @@ if __name__ == '__main__':
                 damage_ability = 'agi',
                 damage_range = 6
             ),
+            'treeman' : Monster(
+                name = 'Tree Man',
+                img_url = "https://www.dndbeyond.com/avatars/thumbnails/36576/553/1000/1000/638291908477327963.png",
+                hp = 14,
+                mp = 14,
+                str = 19,
+                agi = 15,
+                con = 19,
+                mag = 15,
+                res = 14,
+                spd = 14,
+                exp = 4,
+                lvl = 3,
+                gold = 9,
+                damage_type = 'Physical',
+                damage_ability = 'str',
+                damage_range = 10
+            ),
+            'skeleton': Monster(
+                name = 'Skeleton',
+                img_url = "https://www.dndbeyond.com/avatars/thumbnails/30835/849/1000/1000/638063922565505819.png",
+                hp = 18,
+                mp = 17,
+                str = 19,
+                agi = 24,
+                con = 17,
+                mag = 19,
+                res = 13,
+                spd = 12,
+                exp = 6,
+                lvl = 4,
+                gold = 11,
+                damage_type = 'Physical',
+                damage_ability = 'str',
+                damage_range = 12
+            ),
+            'orc': Monster(
+                name = 'Orc',
+                img_url = "https://www.dndbeyond.com/avatars/thumbnails/30834/160/1000/1000/638063882785865067.png",
+                hp = 28,
+                mp = 14,
+                str = 24,
+                agi = 20,
+                con = 25,
+                mag = 17,
+                res = 14,
+                spd = 22,
+                exp = 12,
+                lvl = 6,
+                gold = 18,
+                damage_type = 'Physical',
+                damage_ability = 'str',
+                damage_range = 15
+            ),
+            'bandit': Monster(
+                name = 'Bandit',
+                img_url = "https://www.dndbeyond.com/avatars/thumbnails/30849/318/1000/1000/638064499691067109.png",
+                hp = 36,
+                mp = 14,
+                str = 28,
+                agi = 25,
+                con = 21,
+                mag = 25,
+                res = 22,
+                spd = 28,
+                exp = 16,
+                lvl = 9,
+                gold = 23,
+                damage_type = 'Physical',
+                damage_ability = 'str',
+                damage_range = 19
+            ),
+            'ankheg': Monster(
+                name = 'Ankheg',
+                img_url = 'https://www.dndbeyond.com/avatars/thumbnails/30761/865/1000/1000/638061096692582271.png',
+                hp = 52,
+                mp = 26,
+                str = 36,
+                agi = 33,
+                con = 30,
+                mag = 32,
+                res = 23,
+                spd = 34,
+                exp = 22,
+                lvl = 11,
+                gold = 32,
+                damage_type = 'Physical',
+                damage_ability = 'str',
+                damage_range = 23
+            ),
+            'owlbear': Monster(
+                name = "Owlbear",
+                img_url = 'https://www.dndbeyond.com/avatars/thumbnails/30834/185/1000/1000/638063883093825018.png',
+                hp = 78,
+                mp = 43,
+                str = 47,
+                agi = 39,
+                con = 50,
+                mag = 37,
+                res = 41,
+                spd = 44,
+                exp = 35,
+                lvl = 14,
+                gold = 23,
+                damage_type = 'Physical',
+                damage_ability = 'str',
+                damage_range = 29
+            )
         }
         
         db.session.add_all(list(monsters.values()))
@@ -269,7 +433,31 @@ if __name__ == '__main__':
             'goblin_forrest': Monster_Environment_Association(
                 monster_id = monster_list[0].id,
                 environment_id = environment_list[0].id
-            )
+            ),
+            'treeman_forrest': Monster_Environment_Association(
+                monster_id = monster_list[1].id,
+                environment_id = environment_list[0].id
+            ),
+            'skeleton_forrest': Monster_Environment_Association(
+                monster_id = monster_list[2].id,
+                environment_id = environment_list[0].id
+            ),
+            'orc_forrest': Monster_Environment_Association(
+                monster_id = monster_list[3].id,
+                environment_id = environment_list[0].id
+            ),
+            'bandit_forrest': Monster_Environment_Association(
+                monster_id = monster_list[4].id,
+                environment_id = environment_list[0].id
+            ),
+            'ankheg_forrest': Monster_Environment_Association(
+                monster_id = monster_list[5].id,
+                environment_id = environment_list[0].id
+            ),
+            'owlbear_forrest': Monster_Environment_Association(
+                monster_id = monster_list[6].id,
+                environment_id = environment_list[0].id
+            ),
         }
         db.session.add_all(list(monster_environments.values()))
         db.session.commit()
@@ -373,14 +561,6 @@ if __name__ == '__main__':
         db.session.commit()
         
         ################################################################
-        # print('Creating User/Character Associations...')
-        # for character in character_list:
-        #     new_association = UserCharAssociation(
-        #         user_id= user1.id,
-        #         char_id = character.id,
-        #     )
-        #     db.session.add(new_association)
-        # db.session.commit()
         print('Creating Inventories')
         inventory = Inventory(
             user_id = user1.id,

@@ -5,7 +5,7 @@ import CharacterRender from '../CharacterRenders/CharacterRender'
 
 function Battlemap() {
 
-    const { user, monsters, environment, environments, consumeItem, generateMonsters, textResp, turnOrder, damageMonster, resetText, dodged, runVictory, damageChar, inspection, healChar, insufficientMana, runLoss, rest, runAway } = useContext(MyContext)
+    const { user, monsters, environment, environments, consumeItem, generateMonsters, textResp, turnOrder, damageMonster, resetText, dodged, runVictory, damageChar, inspection, healChar, insufficientMana, runLoss, rest, runAway, spellTarget, stunTarget, bleedTarget, triggerBleed, } = useContext(MyContext)
     const [combatCommand, setCombatCommand] = useState('')
     const [abilityType, setAbilityType] = useState('')
     const [ability, setAbility] = useState(null)
@@ -18,52 +18,50 @@ function Battlemap() {
     const inventorySlots = Object.keys(user.inv[0])
 
     console.log(turnOrder)
+
     useEffect(() => {
         const performDamage = async () => {
-            if (Array.isArray(turnOrder) && turnOrder.length > 1 && turnOrder[0].type === 'monster' && turnOrder.filter(char => char.type === 'char').length > 0 ) {
-
-                let filteredTurnOrder = turnOrder.filter(char => char.type === 'char')
-                let targetChar = Math.round(Math.floor(Math.random() * filteredTurnOrder.length))
-                console.log(targetChar)
-                console.log(turnOrder)
-                let damage_ability = turnOrder[0].damage_ability
+            if (Array.isArray(turnOrder) && turnOrder.length > 1 && turnOrder[0].type === 'monster' && turnOrder.filter(char => char.type === 'char').length > 0) {
+                let filteredTurnOrder = turnOrder.filter(char => char.type === 'char');
+                let targetChar = Math.round(Math.floor(Math.random() * filteredTurnOrder.length));
+                let targetedCharacter = filteredTurnOrder[targetChar]
+                let damage_ability = turnOrder[0].damage_ability;
+                let damageDealt = Math.round(Math.floor((Math.random() * (turnOrder[0][damage_ability] / 2)) + turnOrder[0].damage_range) - ((filteredTurnOrder[targetChar].con / 4) + filteredTurnOrder[targetChar].armor.damage_reduction));
                 console.log(filteredTurnOrder[targetChar])
-                let damageDealt = Math.round(Math.floor((Math.random() * (turnOrder[0][damage_ability] / 2)) + turnOrder[0].damage_range) - ((filteredTurnOrder[targetChar].con / 4) + filteredTurnOrder[targetChar].armor.damage_reduction))
                 if (damageDealt <= 0) {
-                    damageDealt = Math.round(Math.floor(Math.random() * 5) + 1)
+                    damageDealt = Math.round(Math.floor(Math.random() * 5) + 1);
                 }
-                console.log(damageDealt)
-                const runDamage = async (damage, character) => {
-                    damageChar(damage, character)
-                }
-                let dodgeChance = Math.floor(Math.random() * 200) + 1
+                const runDamage = async (damage, targetedCharacter) => {
+                    damageChar(damage, targetedCharacter);
+                };
+                let dodgeChance = Math.floor(Math.random() * 200) + 1;
                 if (turnOrder.length > 0 && filteredTurnOrder[targetChar].agi > dodgeChance) {
-                    const targetCharacter = turnOrder.length > 0 ? turnOrder.findIndex((character) => character.id === filteredTurnOrder[targetChar].id) : null
-                    dodged(filteredTurnOrder[targetCharacter], turnOrder[0], 1)
+                    dodged(filteredTurnOrder[targetChar], turnOrder[0], 1);
                 } else {
-                    await runDamage(damageDealt, filteredTurnOrder[targetChar])
+                    await runDamage(damageDealt, targetedCharacter);
                 }
-
             } else if ((turnOrder.length > 0 && turnOrder.filter(monst => monst.type === 'monster')).length <= 0) {
-                setCombatCommand('victory')
-                runVictory()
+                setCombatCommand('victory');
+                runVictory();
             } else if ((turnOrder.length > 0 && turnOrder.filter(char => char.type === 'char')).length <= 0) {
-                setCombatCommand('loss')
-                runLoss()
+                setCombatCommand('loss');
+                runLoss();
             }
-        }
-        const delay = 500
+        };
+        
+        const delay = 500;
         const timerId = setTimeout(() => {
-            performDamage()
-        }, delay)
-        return () => clearTimeout(timerId)
-    }, [turnOrder])
+            performDamage();
+        }, delay);
+        
+        return () => clearTimeout(timerId);
+    }, [turnOrder]);
 
     const attack = async (monster) => {
         // console.log(turnOrder[0])
         const targetMonster = turnOrder.findIndex((monst) => monst.uniqueKey === monster.uniqueKey)
         console.log(turnOrder[0])
-        let damageDealt = Math.round((Math.floor(Math.random() * turnOrder[0].str) + (turnOrder[0].weapon.damage_boost + 1)) - (turnOrder[targetMonster].con / 4))
+        let damageDealt = Math.round((Math.floor(Math.random() * turnOrder[0].str) + (turnOrder[0].weapon.damage_boost + (turnOrder[0].str / 4))) - (turnOrder[targetMonster].con / 4))
         if (damageDealt <= 0) {
             damageDealt = 1
         }
@@ -77,17 +75,15 @@ function Battlemap() {
     }
 
     const heal = async (character) => {
-        const targetChar = turnOrder.findIndex((char) => char.id === character.id)
-        const healAmount = Math.round(Math.floor((Math.random() * turnOrder[0].mag / 4) + ability.effect_power) + (turnOrder[targetChar].con / 4))
-        console.log(healAmount)
-        console.log(turnOrder[targetChar])
         if (turnOrder[0].current_mp >= ability.cost) {
+            const targetChar = turnOrder.findIndex((char) => char.id === character.id)
+            const healAmount = Math.round(Math.floor((Math.random() * turnOrder[0][`${ability.effect_ability}`] / 4) + ability.effect_power) + (turnOrder[targetChar].con / 4))
             healChar(healAmount, ability.cost, turnOrder[targetChar])
-            setAbility(null)
-            setAbilityType('')
         } else {
             insufficientMana()
         }
+        setAbility(null)
+        setAbilityType('')
         setCombatCommand('')
     }
 
@@ -97,9 +93,61 @@ function Battlemap() {
 
     }
 
-    // const cast = async (monster) => {
-    //     let targetChar
-    // }
+    const spell = async (monster) => {
+        if (turnOrder[0].current_mp >= ability.cost) {
+            const targetMonster = turnOrder.findIndex((monst) => monst.uniqueKey === monster.uniqueKey)
+            const resistance = ability.damage_type === 'Physical' ? "con" : "res"
+            const damageAmount = Math.round(Math.floor((Math.random() * turnOrder[0][`${ability.damage_ability}`]) + (ability.damage_bonus + (turnOrder[0][`${ability.damage_ability}`] / 4 + (turnOrder[0].weapon.damage_boost)))) - (turnOrder[targetMonster][resistance] / 4))
+            spellTarget(damageAmount, ability.cost, targetMonster, ability)
+        } else {
+            insufficientMana()
+        }
+        setAbility(null)
+        setAbilityType('')
+        setCombatCommand('')
+    }
+
+    const stun = async (monster) => {
+        if (turnOrder[0].current_mp >= ability.cost) {
+            const targetMonster = turnOrder.findIndex((monst) => monst.uniqueKey === monster.uniqueKey)
+            const resistance = ability.damage_type === 'Physical' ? "con" : "res"
+            const spellResistance = ability.effect_type === 'Physical' ? 'con' : 'res'
+            const damageAmount = Math.round(Math.floor((Math.random() * turnOrder[0][`${ability.damage_ability}`]) + (ability.damage_bonus + (turnOrder[0][`${ability.damage_ability}`] / 4 + (turnOrder[0].weapon.damage_boost)))) - (turnOrder[targetMonster][resistance] / 4))
+            if (damageAmount <= 0) {
+                damageAmount = 1;
+            }
+            const spellChance = Math.round(Math.floor((Math.random() * turnOrder[0][`${ability.effect_ability}`]) + (ability.effect_power + (turnOrder[0][`${ability.effect_ability}`] / 4))))
+            const spellSuccess = spellChance > (turnOrder[targetMonster][spellResistance]) ? true : false
+            console.log(`successChance: ${spellChance}`, `succeeded: ${spellSuccess}`, `Damage: ${damageAmount}`)
+            stunTarget(damageAmount, ability.cost, targetMonster, ability, spellSuccess)
+        } else {
+            insufficientMana()
+        }
+        setAbility(null)
+        setAbilityType('')
+        setCombatCommand('')
+    }
+
+    const bleed = async (monster) => {
+        if (turnOrder[0].current_mp >= ability.cost) {
+            const targetMonster = turnOrder.findIndex((monst) => monst.uniqueKey === monster.uniqueKey)
+            const resistance = ability.damage_type === 'Physical' ? 'con' : 'res'
+            const spellResistance = ability.effect_type === 'Physical' ? 'con' : 'res'
+            const damageAmount = Math.round(Math.floor((Math.random() * turnOrder[0][`${ability.damage_ability}`]) + (ability.damage_bonus + turnOrder[0].weapon.damage_boost)) - (turnOrder[targetMonster][resistance] / 4))
+            if (damageAmount <= 0) {
+                damageAmount = 1
+            }
+            const spellChance = Math.round(Math.floor((Math.random() * turnOrder[0][`${ability.effect_ability}`]) + (ability.effect_power + (turnOrder[0][`${ability.effect_ability}`] / 4))))
+            const spellSuccess = spellChance > (turnOrder[targetMonster][spellResistance]) ? true : false
+            console.log(`successChance: ${spellChance}`, `resistChance: ${turnOrder[targetMonster][spellResistance]}`, `succeeded: ${spellSuccess}`, `Damage: ${damageAmount}`)
+            bleedTarget(damageAmount, ability.cost, targetMonster, ability, spellSuccess)
+        } else {
+            insufficientMana()
+        }
+        setAbility(null)
+        setAbilityType('')
+        setCombatCommand('')
+    }
 
     const targetItem = async (target) => {
         if (item) {
@@ -146,6 +194,7 @@ function Battlemap() {
             runAway(charSpeed, monSpeed)
         }
     }
+
     return (
         <div>
             <div className='rpg-box'>
@@ -228,17 +277,18 @@ function Battlemap() {
                                     </>
                                 ) : (
                                     <>
-                                    {combatCommand === 'victory' ? (
-                                        <>
-                                        <h1 className='rpg-button' style ={{fontSize: '20px'}} onClick={()=> history.push('/main')}> Return To Town</h1>
-                                        </>
-                                    ) : (
-                                        <>
-                                        <h1 className='rpg-button' style ={{fontSize: '20px'}} onClick={()=> {
-                                            rest(0)
-                                            history.push('/main')}}> Return To Town</h1>
-                                        </>
-                                    )}
+                                        {combatCommand === 'victory' ? (
+                                            <>
+                                                <h1 className='rpg-button' style={{ fontSize: '20px' }} onClick={() => history.push('/main')}> Return To Town</h1>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <h1 className='rpg-button' style={{ fontSize: '20px' }} onClick={() => {
+                                                    rest(0)
+                                                    history.push('/main')
+                                                }}> Return To Town</h1>
+                                            </>
+                                        )}
                                     </>
                                 )}
                             </div>
@@ -252,6 +302,7 @@ function Battlemap() {
 
                                                 {turnOrder.length > 0 && (turnOrder
                                                     .filter(monst => monst.type === 'monster')
+                                                    .sort((a, b) => a.uniqueKey - b.uniqueKey)
                                                     .map((monster, index) => (
                                                         <div key={index}>
                                                             <h3 className='rpg-button' onClick={() => attack(monster)}>{`${monster.name} ${monster.uniqueKey}`}</h3>
@@ -280,9 +331,49 @@ function Battlemap() {
                                                         <h3>Use {ability.name} On Who: </h3>
                                                         {turnOrder.length > 0 && (turnOrder
                                                             .filter(char => char.type === 'char')
+                                                            .sort((a, b) => a.id - b.id)
                                                             .map((character, index) => (
                                                                 <div key={index}>
                                                                     <h3 className='rpg-button' onClick={() => heal(character)}>{character.char_name}</h3>
+                                                                </div>
+                                                            )))}
+                                                    </>
+                                                )}
+                                                {abilityType === 'Stun' && (
+                                                    <>
+                                                        <h3>Use {ability.name} On Who: </h3>
+                                                        {turnOrder.length > 0 && (turnOrder
+                                                            .filter(monst => monst.type === 'monster')
+                                                            .sort((a, b) => a.uniqueKey - b.uniqueKey)
+                                                            .map((monster, index) => (
+                                                                <div key={index}>
+                                                                    <h3 className='rpg-button' onClick={() => stun(monster)}>{`${monster.name} ${monster.uniqueKey}`}</h3>
+                                                                </div>
+                                                            )))}
+                                                    </>
+                                                )}
+                                                {abilityType === 'Spell' && (
+                                                    <>
+                                                        <h3>Use {ability.name} On Who: </h3>
+                                                        {turnOrder.length > 0 && (turnOrder
+                                                            .filter(monst => monst.type === 'monster')
+                                                            .sort((a, b) => a.uniqueKey - b.uniqueKey)
+                                                            .map((monster, index) => (
+                                                                <div key={index}>
+                                                                    <h3 className='rpg-button' onClick={() => spell(monster)}>{`${monster.name} ${monster.uniqueKey}`}</h3>
+                                                                </div>
+                                                            )))}
+                                                    </>
+                                                )}
+                                                {abilityType === 'Bleed' && (
+                                                    <>
+                                                        <h3>Use {ability.name} On Who: </h3>
+                                                        {turnOrder.length > 0 && (turnOrder
+                                                            .filter(monst => monst.type === 'monster')
+                                                            .sort((a, b) => a.uniqueKey - b.uniqueKey)
+                                                            .map((monster, index) => (
+                                                                <div key={index}>
+                                                                    <h3 className='rpg-button' onClick={() => bleed(monster)}>{`${monster.name} ${monster.uniqueKey}`}</h3>
                                                                 </div>
                                                             )))}
                                                     </>
@@ -328,8 +419,9 @@ function Battlemap() {
                                             <>
                                                 <h3>Are You Sure?</h3>
                                                 <br />
-                                                <h3 className='rpg-button'onClick={() => {
-                                                    run()}}>Yes</h3>
+                                                <h3 className='rpg-button' onClick={() => {
+                                                    run()
+                                                }}>Yes</h3>
                                                 <h3 className='rpg-button' onClick={() => setCombatCommand('')}>No</h3>
                                             </>
                                         )}
@@ -339,6 +431,7 @@ function Battlemap() {
                                                 <br />
                                                 {turnOrder.length > 0 && (turnOrder
                                                     .filter(monst => monst.type === 'monster')
+                                                    .sort((a, b) => a.uniqueKey - b.uniqueKey)
                                                     .map((monster, index) => (
                                                         <div key={index}>
                                                             <h3 className='rpg-button' onClick={() => inspectMonster(monster)}>{`${monster.name} ${monster.uniqueKey}`}</h3>
@@ -365,6 +458,7 @@ function Battlemap() {
                             <img src={environment.img_url} alt={`A ${environment.name}`} className='rpg-img'></img>
                             {turnOrder.length > 0 && (turnOrder
                                 .filter(monst => monst.type === 'monster')
+                                .sort((a, b) => a.uniqueKey - b.uniqueKey)
                                 .map((monster, index) => (
                                     <div key={index} style={{ position: 'absolute', top: `25%`, left: `50%`, transform: `translate( -50%, 0) translateX(${(index - Math.floor(monsters.length / 2)) * 90}%)`, width: '20%', textAlign: 'center' }}>
                                         <img src={monster.img_url} alt={`A ${monster.name}`} style={{ maxWidth: '100%', height: 'auto' }}></img>

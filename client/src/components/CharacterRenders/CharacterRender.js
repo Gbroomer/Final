@@ -8,6 +8,7 @@ function CharacterRender({ characterData, inv, user }) {
     return (
         <div >
             <h2>{characterData.char_name}</h2>
+            <h5>{characterData.character_class.class_name}</h5>
             <div className='rpg-progress'>
                 <div className='rpg-progress-bar' style={{ width: `${healthValue}%`, backgroundColor: healthValue > 50 ? 'green' : 'red' }}>
                     <h4>{characterData.current_hp}/{characterData.max_hp}</h4>

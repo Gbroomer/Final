@@ -58,6 +58,7 @@ class Char(db.Model, SerializerMixin):
     max_hp = db.Column(db.Integer, nullable=False)
     current_mp = db.Column(db.Integer, nullable=False)
     status = db.Column(db.String, default= 'none')
+    status_duration = db.Column(db.Integer, default= 0)
     type = db.Column(db.String, default='char')
     max_mp = db.Column(db.Integer, nullable=False)
     wep_id = db.Column(db.Integer, db.ForeignKey('treasures.id'), nullable = False)
@@ -71,7 +72,7 @@ class Char(db.Model, SerializerMixin):
     armor = db.relationship('Treasure', foreign_keys=[arm_id], )
     character_class = db.relationship('Class', foreign_keys=[char_class],)
     
-    serialize_only = ('char_name', 'type', 'character_class', 'str', 'agi', 'con', 'mag', 'res', 'spd', 'current_hp', 'max_hp', 'current_mp', 'max_mp', 'weapon', 'armor', 'id',)
+    serialize_only = ('char_name', 'type', 'character_class', 'str', 'agi', 'con', 'mag', 'res', 'spd', 'current_hp', 'max_hp', 'current_mp', 'max_mp', 'weapon', 'armor', 'id', 'status')
     # serialize_rules = ('-char1_slot.char1_slot', '-char2_slot.char2_slot', '-char3_slot.char3_slot', '-char4_slot.char4_slot',)
     # serialize_rules = ('-weapon_treasure.weapon_chars', '-treasure.armor_chars', '-char1_slot', '-char2_slot', '-char3_slot',)
 
@@ -109,6 +110,7 @@ class Ability(db.Model, SerializerMixin):
     effect_range = db.Column(db.Integer, default= 0 ) ## determines number of targets
     effect_ability = db.Column(db.String, default='None') # determines ability used/buffed/debuffed
     effect_power = db.Column(db.Integer, default = 0) ## determines value of effect (buff, heal, debuff)
+    effect_duration = db.Column(db.Integer, default = 0) ## determines the number of turns a status effect takes place
     damaging = db.Column(db.Boolean, default=True) ## checks if the ability deals damage
     damage_type = db.Column(db.String, default='Physical') ## Magical, Physical for determining resistances if applicable
     damage_range = db.Column(db.Integer, default=1) ## Range of additional damage dealt. Can be negative or positive.
@@ -119,7 +121,7 @@ class Ability(db.Model, SerializerMixin):
     classes = db.relationship('Class_Ability_Association', backref='ability', lazy='dynamic')
     monsters = db.relationship('Monster_Ability_Association', backref='ability', lazy='dynamic')
     
-    serialize_only = ('name', 'cost', 'status_effect', 'effect_hostile', 'effect_version', 'effect_type', 'effect_range', 'effect_ability', 'effect_power', 'damaging', 'damage_type', 'damage_range', 'damage_ability', 'damage_bonus', 'level_req')
+    serialize_only = ('name', 'cost', 'status_effect', 'effect_hostile', 'effect_version', 'effect_type', 'effect_range', 'effect_ability', 'effect_power', 'effect_duration', 'damaging', 'damage_type', 'damage_range', 'damage_ability', 'damage_bonus', 'level_req')
     
 class Class_Ability_Association(db.Model, SerializerMixin):
     
@@ -222,6 +224,8 @@ class Monster(db.Model, SerializerMixin):
     img_url = db.Column(db.String)
     hp = db.Column(db.Integer, nullable=False)
     type = db.Column(db.String, default='monster')
+    status = db.Column(db.String, default='None')
+    status_duration = db.Column(db.Integer, default = 0)
     mp = db.Column(db.Integer, nullable=False)
     str = db.Column(db.Integer, nullable=False)
     agi = db.Column(db.Integer, nullable=False)

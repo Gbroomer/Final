@@ -43,7 +43,7 @@ const MyContextProvider = ({ children }) => {
 
     const generateMonsters = (environ) => {
         setEnvironment(environ)
-        const availableMonsters = environ.monsters.filter(({ monster }) => monster.lvl <= (user.lvl + 4))
+        const availableMonsters = environ.monsters.filter(({ monster }) => monster.lvl <= (user.lvl + 4) && monster.lvl >= (user.lvl - 3))
         const selectedMonsters = []
         const maxDifficultyLevel = user.lvl + 9
         let totalMonsterLevel = 0
@@ -103,11 +103,7 @@ const MyContextProvider = ({ children }) => {
         setEnvironments(environments)
     }
 
-    const damageChar = async (damage, character) => {
-        return new Promise(async (resolve) => {
-            const updatedUser = { ...user }
-            const updatedTurnOrder = [...turnOrder]
-            const tempArray = [...textResp]
+    const confirmDamage = (damage, character, updatedUser, updatedTurnOrder, tempArray) => {
             for (let i = 1; i < 5; i++) {
                 if (user[`char${i}`].id === character.id) {
                     updatedUser[`char${i}`].current_hp -= damage
@@ -127,7 +123,34 @@ const MyContextProvider = ({ children }) => {
             setUser(updatedUser)
             setTextResp(tempArray)
             setTurnOrder(updatedTurnOrder)
-            resolve()
+    }
+
+    const damageChar = async (damage, character) => {
+        return new Promise(async (resolve) => {
+            const updatedUser = { ...user }
+            const updatedTurnOrder = [...turnOrder]
+            const tempArray = [...textResp]
+            if (turnOrder[0].status === 'bleed') {
+                    let bleedDamage = Math.round(Math.floor(Math.random() * (turnOrder[0].con / 3)) + 1)
+                    turnOrder[0].hp -= bleedDamage
+                    tempArray.push(`${turnOrder[0].name} bled for ${bleedDamage}!`)
+                    if (turnOrder[0].hp <= 0) {
+                        tempArray.push(`${turnOrder[0].name} died!`)
+                        await addXp(turnOrder[0].exp, turnOrder[0].gold, updatedUser)
+                        tempArray.push(`You gained ${turnOrder[0].exp}xp and ${turnOrder[0].gold} gold!`)
+                        if ((user.xp + turnOrder[0].exp) >= xpThreshold(user.lvl)) {
+                            tempArray.push(`Your party has leveled up!`)
+                        }
+                        updatedTurnOrder.splice(0, 1)
+                        setTurnOrder(updatedTurnOrder)
+                    } else {
+                        confirmDamage(damage, character, updatedUser, updatedTurnOrder, tempArray)
+                    }
+                    setTextResp(tempArray)
+            } else {
+                confirmDamage(damage, character, updatedUser, updatedTurnOrder, tempArray)
+            }
+        resolve()
         })
     }
 
@@ -139,6 +162,7 @@ const MyContextProvider = ({ children }) => {
             for (let i = 1; i < 5; i++) {
                 if (user[`char${i}`].id === turnOrder[0].id) {
                     updatedUser[`char${i}`].current_mp -= cost
+                    break
                 }
             }
             for (let i = 1; i < 5; i++) {
@@ -156,6 +180,143 @@ const MyContextProvider = ({ children }) => {
             setUser(updatedUser)
             setTextResp(tempArray)
             setTurnOrder(updatedTurnOrder)
+        })
+    }
+
+    const spellTarget = async (damage, cost, target, spell) => {
+        return new Promise(async (resolve) => {
+            const updatedUser = { ...user }
+            const updatedTurnOrder = [...turnOrder]
+            const tempArray = [...textResp]
+            const targetMonster = updatedTurnOrder[target]
+
+            for (let i = 1; i < 5; i++) {
+                if (user[`char${i}`].id === turnOrder[0].id) {
+                    updatedUser[`char${i}`].current_mp -= cost
+                    break
+                }
+            }
+
+            if (targetMonster && targetMonster.hp > 0) {
+                targetMonster.hp -= damage
+                tempArray.push(`${turnOrder[0].char_name} dealt ${damage} to the target ${targetMonster.name} with a ${spell.name}!`)
+                if (targetMonster.hp <= 0) {
+                    tempArray.push(`The target ${targetMonster.name} died!`)
+                    await addXp(targetMonster.exp, targetMonster.gold, updatedUser)
+                    tempArray.push(`You gained ${targetMonster.exp}xp and ${targetMonster.gold} gold!`)
+                    if ((user.xp + targetMonster.exp) >= xpThreshold(user.lvl)) {
+                        tempArray.push(`Your party has leveled up!`)
+                    }
+                    updatedTurnOrder.splice(target, 1)
+                }
+                const firstEntity = updatedTurnOrder.shift()
+                updatedTurnOrder.push(firstEntity)
+                setTurnOrder(updatedTurnOrder)
+                setUser(updatedUser)
+                setTextResp(tempArray)
+            }
+            resolve()
+        })
+    }
+
+    const stunTarget = async (damage, cost, target, spell, success) => {
+        return new Promise(async (resolve) => {
+            const updatedUser = { ...user }
+            const updatedTurnOrder = [...turnOrder]
+            const tempArray = [...textResp]
+            const targetMonster = updatedTurnOrder[target]
+
+            for (let i = 1; i < 5; i++) {
+                if (user[`char${i}`].id === turnOrder[0].id) {
+                    updatedUser[`char${i}`].current_mp -= cost
+                    break
+                }
+            }
+
+            if (targetMonster && targetMonster.hp > 0) {
+                targetMonster.hp -= damage
+                tempArray.push(`${turnOrder[0].char_name} dealt ${damage} to the target ${targetMonster.name} with a ${spell.name}!`)
+                if (targetMonster.hp <= 0) {
+                    tempArray.push(`The target ${targetMonster.name} died!`)
+                    await addXp(targetMonster.exp, targetMonster.gold, updatedUser)
+                    tempArray.push(`You gained ${targetMonster.exp}xp and ${targetMonster.gold} gold!`)
+                    if ((user.xp + targetMonster.exp) >= xpThreshold(user.lvl)) {
+                        tempArray.push(`Your party has leveled up!`)
+                    }
+                    updatedTurnOrder.splice(target, 1)
+                    const firstEntity = updatedTurnOrder.shift()
+                    updatedTurnOrder.push(firstEntity)
+                } else if (success === true) {
+                    const shiftedTarget = updatedTurnOrder.splice(target, 1)[0]
+                    const firstEntity = updatedTurnOrder.shift()
+                    updatedTurnOrder.push(firstEntity)
+                    updatedTurnOrder.push(shiftedTarget)
+                    tempArray.push(`${turnOrder[0].char_name} successfully stunned the ${targetMonster.name}!`)
+                } else {
+                    tempArray.push(`${turnOrder[0].char_name} failed to stun the ${targetMonster.name}`)
+                    const firstEntity = updatedTurnOrder.shift()
+                    updatedTurnOrder.push(firstEntity)
+                }
+                setTurnOrder(updatedTurnOrder)
+                setUser(updatedUser)
+                setTextResp(tempArray)
+            }
+            resolve()
+        })
+    }
+
+    const bleedTarget = async (damage, cost, target, spell, success) => {
+        return new Promise(async (resolve) => {
+            const updatedUser = { ...user }
+            const updatedTurnOrder = [...turnOrder]
+            const tempArray = [...textResp]
+            const targetMonster = updatedTurnOrder[target]
+
+            for (let i = 1; i < 5; i++) {
+                if (user[`char${i}`].id === turnOrder[0].id) {
+                    updatedUser[`char${i}`].current_mp -= cost
+                    break
+                }
+            }
+
+            if (targetMonster && targetMonster.hp > 0) {
+                targetMonster.hp -= damage
+                tempArray.push(`${turnOrder[0].char_name} dealt ${damage} to the target ${targetMonster.name} with a ${spell.name}!`)
+                if (targetMonster.hp <= 0) {
+                    tempArray.push(`The target ${targetMonster.name} died!`)
+                    await addXp(targetMonster.exp, targetMonster.gold, updatedUser)
+                    tempArray.push(`You gained ${targetMonster.exp}xp and ${targetMonster.gold} gold!`)
+                    if ((user.xp + targetMonster.exp) >= xpThreshold(user.lvl)) {
+                        tempArray.push(`Your party has leveled up!`)
+                    }
+                    updatedTurnOrder.splice(target, 1)
+                } else if (success === true) {
+                    targetMonster.status = 'bleed'
+                    targetMonster.status_duration = spell.effect_duration
+                    tempArray.push(`${turnOrder[0].char_name} successfully caused the ${targetMonster.name} to bleed!`)
+                } else {
+                    tempArray.push(`${turnOrder[0].char_name} failed to cause the ${targetMonster.name} to bleed`)
+                    const firstEntity = updatedTurnOrder.shift()
+                    updatedTurnOrder.push(firstEntity)
+                }
+                const firstEntity = updatedTurnOrder.shift()
+                updatedTurnOrder.push(firstEntity)
+                setTurnOrder(updatedTurnOrder)
+                setUser(updatedUser)
+                setTextResp(tempArray)
+            }
+
+            resolve()
+        })
+    }
+
+    const triggerBleed = async () => {
+        return new Promise(async (resolve) => {
+            const updatedTurnOrder = [...turnOrder]
+            const tempArray = [...textResp]
+            let updatedUser = { ...user }
+            
+            resolve()
         })
     }
 
@@ -226,6 +387,7 @@ const MyContextProvider = ({ children }) => {
         console.log(tempArray)
         setTextResp(tempArray)
     }
+
     const resetText = async () => {
         setTextResp([])
     }
@@ -408,6 +570,10 @@ const MyContextProvider = ({ children }) => {
             runVictory,
             runLoss,
             runAway,
+            spellTarget,
+            stunTarget,
+            bleedTarget,
+            triggerBleed,
         }}>
             {children}
         </MyContext.Provider>

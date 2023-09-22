@@ -161,7 +161,6 @@ function Main() {
                     <button className='rpg-button rpg-text-options' onClick={() => setChoice("shop")}>Shop</button>
                     <button className='rpg-button rpg-text-options' onClick={() => setChoice('rest')}>Rest</button>
                     <button className='rpg-button rpg-text-options' onClick={saveGame}>Save</button>
-                    <button className='rpg-button rpg-text-options' onClick={() => cheat()}>Cheat</button>
                     <button className='rpg-button rpg-text-options' onClick={() => history.push('/About')}>About</button>
                 </div>
             )}
