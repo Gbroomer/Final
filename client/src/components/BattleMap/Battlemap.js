@@ -138,7 +138,7 @@ function Battlemap() {
                 damageAmount = 1
             }
             const spellChance = Math.round(Math.floor((Math.random() * turnOrder[0][`${ability.effect_ability}`]) + (ability.effect_power + (turnOrder[0][`${ability.effect_ability}`] / 4))))
-            const spellSuccess = spellChance > (turnOrder[targetMonster][spellResistance]) ? true : false
+            const spellSuccess = spellChance >= (turnOrder[targetMonster][spellResistance]) ? true : false
             console.log(`successChance: ${spellChance}`, `resistChance: ${turnOrder[targetMonster][spellResistance]}`, `succeeded: ${spellSuccess}`, `Damage: ${damageAmount}`)
             bleedTarget(damageAmount, ability.cost, targetMonster, ability, spellSuccess)
         } else {

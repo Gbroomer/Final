@@ -130,11 +130,13 @@ const MyContextProvider = ({ children }) => {
             const updatedUser = { ...user }
             const updatedTurnOrder = [...turnOrder]
             const tempArray = [...textResp]
-            if (turnOrder[0].status === 'bleed') {
+            if ((turnOrder[0].status === 'bleed') || (turnOrder[0].status === 'burn')) {
                     let bleedDamage = Math.round(Math.floor(Math.random() * (turnOrder[0].con / 3)) + 1)
-                    turnOrder[0].hp -= bleedDamage
-                    tempArray.push(`${turnOrder[0].name} bled for ${bleedDamage}!`)
-                    if (turnOrder[0].hp <= 0) {
+                    updatedTurnOrder[0].hp -= bleedDamage
+                    if (updatedTurnOrder[0].status_duration > 0) return (updatedTurnOrder[0].status_duration -= 1)
+                    if (updatedTurnOrder[0].status_duration <= 0) return (updatedTurnOrder[0].status = 'None')
+                    tempArray.push(`${turnOrder[0].name} ${turnOrder[0].status === 'bleed' ? 'bled' : 'burned'} for ${bleedDamage}!`)
+                    if (updatedTurnOrder[0].hp <= 0) {
                         tempArray.push(`${turnOrder[0].name} died!`)
                         await addXp(turnOrder[0].exp, turnOrder[0].gold, updatedUser)
                         tempArray.push(`You gained ${turnOrder[0].exp}xp and ${turnOrder[0].gold} gold!`)

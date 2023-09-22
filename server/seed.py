@@ -286,7 +286,7 @@ if __name__ == '__main__':
             'goblin': Monster(
                 name = 'Goblin',
                 img_url = "https://www.dndbeyond.com/avatars/thumbnails/30783/955/1000/1000/638062024584880857.png",
-                hp = 10,
+                hp = 15,
                 mp = 10,
                 str = 12,
                 agi = 17,
@@ -304,7 +304,7 @@ if __name__ == '__main__':
             'treeman' : Monster(
                 name = 'Tree Man',
                 img_url = "https://www.dndbeyond.com/avatars/thumbnails/36576/553/1000/1000/638291908477327963.png",
-                hp = 14,
+                hp = 20,
                 mp = 14,
                 str = 19,
                 agi = 15,
@@ -322,7 +322,7 @@ if __name__ == '__main__':
             'skeleton': Monster(
                 name = 'Skeleton',
                 img_url = "https://www.dndbeyond.com/avatars/thumbnails/30835/849/1000/1000/638063922565505819.png",
-                hp = 18,
+                hp = 27,
                 mp = 17,
                 str = 19,
                 agi = 24,
@@ -340,7 +340,7 @@ if __name__ == '__main__':
             'orc': Monster(
                 name = 'Orc',
                 img_url = "https://www.dndbeyond.com/avatars/thumbnails/30834/160/1000/1000/638063882785865067.png",
-                hp = 28,
+                hp = 39,
                 mp = 14,
                 str = 24,
                 agi = 20,
@@ -358,7 +358,7 @@ if __name__ == '__main__':
             'bandit': Monster(
                 name = 'Bandit',
                 img_url = "https://www.dndbeyond.com/avatars/thumbnails/30849/318/1000/1000/638064499691067109.png",
-                hp = 36,
+                hp = 52,
                 mp = 14,
                 str = 28,
                 agi = 25,
@@ -376,7 +376,7 @@ if __name__ == '__main__':
             'ankheg': Monster(
                 name = 'Ankheg',
                 img_url = 'https://www.dndbeyond.com/avatars/thumbnails/30761/865/1000/1000/638061096692582271.png',
-                hp = 52,
+                hp = 76,
                 mp = 26,
                 str = 36,
                 agi = 33,
@@ -394,7 +394,7 @@ if __name__ == '__main__':
             'owlbear': Monster(
                 name = "Owlbear",
                 img_url = 'https://www.dndbeyond.com/avatars/thumbnails/30834/185/1000/1000/638063883093825018.png',
-                hp = 78,
+                hp = 97,
                 mp = 43,
                 str = 47,
                 agi = 39,
