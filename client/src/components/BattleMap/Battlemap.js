@@ -5,7 +5,7 @@ import CharacterRender from '../CharacterRenders/CharacterRender'
 
 function Battlemap() {
 
-    const { user, monsters, environment, environments, consumeItem, generateMonsters, textResp, turnOrder, damageMonster, resetText, dodged, runVictory, damageChar, inspection, healChar, insufficientMana, runLoss, rest, runAway, spellTarget, stunTarget, bleedTarget, triggerBleed, } = useContext(MyContext)
+    const { user, monsters, environment, environments, consumeItem, generateMonsters, textResp, turnOrder, damageMonster, resetText, dodged, runVictory, damageChar, inspection, healChar, insufficientMana, runLoss, rest, runAway, spellTarget, stunTarget, bleedTarget, } = useContext(MyContext)
     const [combatCommand, setCombatCommand] = useState('')
     const [abilityType, setAbilityType] = useState('')
     const [ability, setAbility] = useState(null)
@@ -26,7 +26,7 @@ function Battlemap() {
                 let targetChar = Math.round(Math.floor(Math.random() * filteredTurnOrder.length));
                 let targetedCharacter = filteredTurnOrder[targetChar]
                 let damage_ability = turnOrder[0].damage_ability;
-                let damageDealt = Math.round(Math.floor((Math.random() * (turnOrder[0][damage_ability] / 2)) + turnOrder[0].damage_range) - ((filteredTurnOrder[targetChar].con / 4) + filteredTurnOrder[targetChar].armor.damage_reduction));
+                let damageDealt = Math.round(Math.floor((Math.random() * (turnOrder[0][damage_ability])) + turnOrder[0].damage_range) - ((filteredTurnOrder[targetChar].con / 4) + filteredTurnOrder[targetChar].armor.damage_reduction));
                 console.log(filteredTurnOrder[targetChar])
                 if (damageDealt <= 0) {
                     damageDealt = Math.round(Math.floor(Math.random() * 5) + 1);
@@ -48,12 +48,12 @@ function Battlemap() {
                 runLoss();
             }
         };
-        
+
         const delay = 500;
         const timerId = setTimeout(() => {
             performDamage();
         }, delay);
-        
+
         return () => clearTimeout(timerId);
     }, [turnOrder]);
 
@@ -75,7 +75,14 @@ function Battlemap() {
     }
 
     const heal = async (character) => {
-        if (turnOrder[0].current_mp >= ability.cost) {
+        let caster
+        for (let i = 1; i < 5; i++) {
+            if (user[`char${i}`].id === turnOrder[0].id) {
+                caster = user[`char${i}`]
+                break
+            }
+        }
+        if (caster.current_mp >= ability.cost) {
             const targetChar = turnOrder.findIndex((char) => char.id === character.id)
             const healAmount = Math.round(Math.floor((Math.random() * turnOrder[0][`${ability.effect_ability}`] / 4) + ability.effect_power) + (turnOrder[targetChar].con / 4))
             healChar(healAmount, ability.cost, turnOrder[targetChar])
@@ -94,7 +101,15 @@ function Battlemap() {
     }
 
     const spell = async (monster) => {
-        if (turnOrder[0].current_mp >= ability.cost) {
+        let caster
+        for (let i = 1; i < 5; i++) {
+            if (user[`char${i}`].id === turnOrder[0].id) {
+                caster = user[`char${i}`]
+                break
+            }
+        }
+        console.log(caster)
+        if (caster.current_mp >= ability.cost) {
             const targetMonster = turnOrder.findIndex((monst) => monst.uniqueKey === monster.uniqueKey)
             const resistance = ability.damage_type === 'Physical' ? "con" : "res"
             const damageAmount = Math.round(Math.floor((Math.random() * turnOrder[0][`${ability.damage_ability}`]) + (ability.damage_bonus + (turnOrder[0][`${ability.damage_ability}`] / 4 + (turnOrder[0].weapon.damage_boost)))) - (turnOrder[targetMonster][resistance] / 4))
@@ -108,11 +123,18 @@ function Battlemap() {
     }
 
     const stun = async (monster) => {
-        if (turnOrder[0].current_mp >= ability.cost) {
+        let caster
+        for (let i = 1; i < 5; i++) {
+            if (user[`char${i}`].id === turnOrder[0].id) {
+                caster = user[`char${i}`]
+                break
+            }
+        }
+        if (caster.current_mp >= ability.cost) {
             const targetMonster = turnOrder.findIndex((monst) => monst.uniqueKey === monster.uniqueKey)
             const resistance = ability.damage_type === 'Physical' ? "con" : "res"
             const spellResistance = ability.effect_type === 'Physical' ? 'con' : 'res'
-            const damageAmount = Math.round(Math.floor((Math.random() * turnOrder[0][`${ability.damage_ability}`]) + (ability.damage_bonus + (turnOrder[0][`${ability.damage_ability}`] / 4 + (turnOrder[0].weapon.damage_boost)))) - (turnOrder[targetMonster][resistance] / 4))
+            const damageAmount = Math.round(Math.floor((Math.random() * turnOrder[0][`${ability.damage_ability}`]) + (ability.damage_bonus + (turnOrder[0][`${ability.damage_ability}`] / 5 + (turnOrder[0].weapon.damage_boost)))) - (turnOrder[targetMonster][resistance] / 4))
             if (damageAmount <= 0) {
                 damageAmount = 1;
             }
@@ -129,7 +151,14 @@ function Battlemap() {
     }
 
     const bleed = async (monster) => {
-        if (turnOrder[0].current_mp >= ability.cost) {
+        let caster
+        for (let i = 1; i < 5; i++) {
+            if (user[`char${i}`].id === turnOrder[0].id) {
+                caster = user[`char${i}`]
+                break
+            }
+        }
+        if (caster.current_mp >= ability.cost) {
             const targetMonster = turnOrder.findIndex((monst) => monst.uniqueKey === monster.uniqueKey)
             const resistance = ability.damage_type === 'Physical' ? 'con' : 'res'
             const spellResistance = ability.effect_type === 'Physical' ? 'con' : 'res'
@@ -313,17 +342,27 @@ function Battlemap() {
                                         {combatCommand === 'abilities' && (
                                             <>
                                                 {abilityType === '' && (
+                                
                                                     <>
-                                                        <h3>Use Which Ability: </h3>
-                                                        {turnOrder.length > 0 && turnOrder[0].character_class.abilities.length > 0 && (turnOrder[0].character_class.abilities
-                                                            .map((ability, index) => (
-                                                                <div key={index}>
-                                                                    <h3 className='rpg-button' onClick={() => {
-                                                                        setAbility(ability.ability)
-                                                                        setAbilityType(`${ability.ability.effect_version}`)
-                                                                    }}>{`${ability.ability.name}`}: {ability.ability.cost}mp</h3>
-                                                                </div>
-                                                            )))}
+                                                        <h3>Use Which Ability:</h3>
+                                                        {turnOrder.length > 0 && turnOrder[0].character_class.abilities.length > 0 && (
+                                                            Array.from({ length: 4 }, (_, i) => {
+                                                                const character = user[`char${i + 1}`];
+                                                                if (character && character.id === turnOrder[0].id) {
+                                                                    return character.character_class.abilities
+                                                                    .filter(ability => ability.ability.level_req <= user.lvl)
+                                                                    .map((ability, index) => (
+                                                                        <div key={index}>
+                                                                            <h3 className='rpg-button' onClick={() => {
+                                                                                setAbility(ability.ability);
+                                                                                setAbilityType(`${ability.ability.effect_version}`);
+                                                                            }}>{`${ability.ability.name}`}: {ability.ability.cost}mp</h3>
+                                                                        </div>
+                                                                    ));
+                                                                }
+                                                                return null; 
+                                                            })
+                                                        )}
                                                     </>
                                                 )}
                                                 {abilityType === 'Heal' && (
@@ -467,9 +506,9 @@ function Battlemap() {
                                 )))}
                         </div>
                     </div>
-                    <div className='rpg-box'>
+                    {/* <div className='rpg-box'>
                         <button className='rpg-button' onClick={() => history.push('/main')}>Cheat Return</button>
-                    </div>
+                    </div> */}
                 </div>
             ) : (
                 <div className='rpg-box centered-menu' >
@@ -478,7 +517,7 @@ function Battlemap() {
                     {environments.map((environ, index) => (
                         <button key={index} onClick={() => generateMonsters(environ)} className='rpg-button rpg-text-options'>{environ.name}</button>
                     ))}
-                    <button className='rpg-button rpg-text-options' onClick={() => history.goBack()}>Return</button>
+                    <button className='rpg-button rpg-text-options' onClick={() => history.push('/main')}>Return</button>
                 </div>
 
             )}

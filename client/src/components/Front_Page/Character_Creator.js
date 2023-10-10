@@ -56,8 +56,8 @@ function Character_Creator() {
                     max_hp: 10 + parseInt(selectedClass.hp_growth, 10),
                     current_mp: 10 + parseInt(selectedClass.mp_growth, 10),
                     max_mp: 10 + parseInt(selectedClass.mp_growth, 10),
-                    wep_id: 1,
-                    arm_id: 2,
+                    wep_id: 3,
+                    arm_id: 4,
                 }
                 console.log(newCharacter)
                 console.log(user)

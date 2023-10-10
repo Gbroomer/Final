@@ -14,7 +14,7 @@ function Shop() {
             try {
                 const response = await fetch('http://127.0.0.1:5555/treasures')
                 const treasures = await response.json()
-                const filteredTreasures = treasures.filter(treasure => treasure.level <= user.lvl).sort(() => Math.random() - 0.5).slice(0, 7)
+                const filteredTreasures = treasures.filter(treasure => treasure.level <= user.lvl && treasure.level >= (user.lvl /2 - 1)).sort(() => Math.random() - 0.5).slice(0, 7)
                 setTreasures(filteredTreasures)
             } catch (error) {
                 console.log("Error fetching Treasures", error)

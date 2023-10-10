@@ -43,9 +43,9 @@ const MyContextProvider = ({ children }) => {
 
     const generateMonsters = (environ) => {
         setEnvironment(environ)
-        const availableMonsters = environ.monsters.filter(({ monster }) => monster.lvl <= (user.lvl + 4) && monster.lvl >= (user.lvl - 3))
+        const availableMonsters = environ.monsters.filter(({ monster }) => monster.lvl <= (user.lvl + 5) && monster.lvl >= (user.lvl - 2))
         const selectedMonsters = []
-        const maxDifficultyLevel = user.lvl + 9
+        const maxDifficultyLevel = user.lvl + 11
         let totalMonsterLevel = 0
         const monsterCount = Math.floor(Math.random() * 5) + 1
         console.log(monsterCount)
@@ -130,12 +130,18 @@ const MyContextProvider = ({ children }) => {
             const updatedUser = { ...user }
             const updatedTurnOrder = [...turnOrder]
             const tempArray = [...textResp]
-            if ((turnOrder[0].status === 'bleed') || (turnOrder[0].status === 'burn')) {
-                    let bleedDamage = Math.round(Math.floor(Math.random() * (turnOrder[0].con / 3)) + 1)
+            console.log(updatedTurnOrder[0])
+            if (turnOrder[0].status === 'bleed' || turnOrder[0].status === 'burn') {
+                    let bleedDamage = Math.round(Math.floor(Math.random() * (turnOrder[0].con / 2)) + 1)
                     updatedTurnOrder[0].hp -= bleedDamage
-                    if (updatedTurnOrder[0].status_duration > 0) return (updatedTurnOrder[0].status_duration -= 1)
-                    if (updatedTurnOrder[0].status_duration <= 0) return (updatedTurnOrder[0].status = 'None')
+                    console.log(updatedTurnOrder)
                     tempArray.push(`${turnOrder[0].name} ${turnOrder[0].status === 'bleed' ? 'bled' : 'burned'} for ${bleedDamage}!`)
+                    if (updatedTurnOrder[0].status_duration > 0) {
+                        updatedTurnOrder[0].status_duration -= 1
+                    }
+                    if (updatedTurnOrder[0].status_duration <= 0) {
+                        updatedTurnOrder[0].status = 'None'
+                    }
                     if (updatedTurnOrder[0].hp <= 0) {
                         tempArray.push(`${turnOrder[0].name} died!`)
                         await addXp(turnOrder[0].exp, turnOrder[0].gold, updatedUser)
@@ -144,12 +150,15 @@ const MyContextProvider = ({ children }) => {
                             tempArray.push(`Your party has leveled up!`)
                         }
                         updatedTurnOrder.splice(0, 1)
+                        console.log('break at dead')
                         setTurnOrder(updatedTurnOrder)
                     } else {
+                        console.log('break at burned')
                         confirmDamage(damage, character, updatedUser, updatedTurnOrder, tempArray)
                     }
                     setTextResp(tempArray)
             } else {
+                console.log('break at else (no burn)')
                 confirmDamage(damage, character, updatedUser, updatedTurnOrder, tempArray)
             }
         resolve()
@@ -182,6 +191,7 @@ const MyContextProvider = ({ children }) => {
             setUser(updatedUser)
             setTextResp(tempArray)
             setTurnOrder(updatedTurnOrder)
+            resolve()
         })
     }
 
@@ -293,11 +303,12 @@ const MyContextProvider = ({ children }) => {
                     }
                     updatedTurnOrder.splice(target, 1)
                 } else if (success === true) {
-                    targetMonster.status = 'bleed'
+                    console.log(spell)
+                    targetMonster.status = spell.effect_type === 'Physical' ? 'bleed' : 'burn'
                     targetMonster.status_duration = spell.effect_duration
-                    tempArray.push(`${turnOrder[0].char_name} successfully caused the ${targetMonster.name} to bleed!`)
+                    tempArray.push(`${turnOrder[0].char_name} successfully caused the ${targetMonster.name} to ${targetMonster.status}!`)
                 } else {
-                    tempArray.push(`${turnOrder[0].char_name} failed to cause the ${targetMonster.name} to bleed`)
+                    tempArray.push(`${turnOrder[0].char_name} failed to cause the ${targetMonster.name} to ${spell.effect_type === 'Physical' ? 'bleed' : 'burn'}`)
                     const firstEntity = updatedTurnOrder.shift()
                     updatedTurnOrder.push(firstEntity)
                 }
@@ -308,16 +319,6 @@ const MyContextProvider = ({ children }) => {
                 setTextResp(tempArray)
             }
 
-            resolve()
-        })
-    }
-
-    const triggerBleed = async () => {
-        return new Promise(async (resolve) => {
-            const updatedTurnOrder = [...turnOrder]
-            const tempArray = [...textResp]
-            let updatedUser = { ...user }
-            
             resolve()
         })
     }
@@ -439,7 +440,6 @@ const MyContextProvider = ({ children }) => {
     const levelUpCharacter = (updatedUser, characterIndex) => {
 
         const character = updatedUser[`char${characterIndex}`]
-        // console.log(character.character_class)
         const updatedCharacter = {
             ...character,
             current_hp: character.current_hp <= 0 ? 0 : character.character_class.hp_growth + character.current_hp,
@@ -457,7 +457,7 @@ const MyContextProvider = ({ children }) => {
         return updatedUser
     }
 
-    const addXp = async (xpGain, goldGain, updatedUser) => {
+    const addXp = async (xpGain, goldGain, updatedUser, updatedTurnOrder) => {
         return new Promise(resolve => {
             updatedUser.xp += xpGain;
             updatedUser.gold += goldGain
@@ -575,7 +575,6 @@ const MyContextProvider = ({ children }) => {
             spellTarget,
             stunTarget,
             bleedTarget,
-            triggerBleed,
         }}>
             {children}
         </MyContext.Provider>

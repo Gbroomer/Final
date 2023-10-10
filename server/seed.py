@@ -28,23 +28,25 @@ if __name__ == '__main__':
 
         ################################################################
         print('Creating Treasures')
-        sword = Treasure(
-            name = 'Worn Arming Sword', 
-            description = 'A worn down thing, No amount of sharpening will restore its edge.', 
-            type = 'wep',
-            consumable_effect = 'none',
-            consumable_potency = 0,
-            stat_buff = 'none',
-            stat_potency = 0,
-            reduction = False,
-            damage_reduction = 0,
-            boost = True,
-            damage_boost = 2,
-            level = 1,
-            cost = 5,
-        )
-        chain = Treasure(
-            name = 'Worn Chainmail',
+        
+        items = {
+            'sword': Treasure(
+                name = 'Worn Arming Sword', 
+                description = 'A worn down thing, No amount of sharpening will restore its edge.', 
+                type = 'wep',
+                consumable_effect = 'none',
+                consumable_potency = 0,
+                stat_buff = 'none',
+                stat_potency = 0,
+                reduction = False,
+                damage_reduction = 0,
+                boost = True,
+                damage_boost = 2,
+                level = 1,
+                cost = 5,
+            ),
+            'chain':Treasure(
+            name = 'Rusted Chainmail',
             description = 'A beaten up set of chainmail. Even with a good sand polishing, the rust would remain.',
             type = 'arm',
             consumable_effect = 'none',
@@ -52,92 +54,152 @@ if __name__ == '__main__':
             stat_buff = 'none',
             stat_potency = 0,
             reduction = True,
-            damage_reduction = 3,
+            damage_reduction = 5,
             boost = False,
             damage_boost = 0,
             level = 3,
             cost = 5,
-        )
-        dagger = Treasure(
-            name = 'Rusted Dagger', 
-            description = "A pitiful little thing. Careful around wounds and not to nick yourself.", 
-            type = 'wep',
-            consumable_effect = 'none',
-            consumable_potency = 0,
-            stat_buff = 'none',
-            stat_potency = 0,
-            reduction = False,
-            damage_reduction = 0,
-            boost = True,
-            damage_boost = 1,
-            level = 1,
-            cost = 2,
-        )
-        rags = Treasure(
-            name = 'Tattered Rags',
-            description = 'A pitiful set of rags that hardly count as clothing.',
-            type = 'arm',
-            consumable_effect = 'none',
-            consumable_potency = 0,
-            stat_buff = 'none',
-            stat_potency = 0,
-            reduction = True,
-            damage_reduction = 1,
-            boost = False,
-            damage_boost = 0,
-            level = 1,
-            cost = 2,
-        )
-        healing_pot= Treasure(
-            name = 'Lesser Healing Potion',
+            ),
+            'dagger': Treasure(
+                name = 'Rusted Dagger', 
+                description = "A pitiful little thing. Careful around wounds and not to nick yourself.", 
+                type = 'wep',
+                consumable_effect = 'none',
+                consumable_potency = 0,
+                stat_buff = 'none',
+                stat_potency = 0,
+                reduction = False,
+                damage_reduction = 0,
+                boost = True,
+                damage_boost = 1,
+                level = 1,
+                cost = 2,
+            ),
+            'rags':Treasure(
+                name = 'Tattered Rags',
+                description = 'A pitiful set of rags that hardly count as clothing.',
+                type = 'arm',
+                consumable_effect = 'none',
+                consumable_potency = 0,
+                stat_buff = 'none',
+                stat_potency = 0,
+                reduction = True,
+                damage_reduction = 1,
+                boost = False,
+                damage_boost = 0,
+                level = 1,
+                cost = 2,
+            ),
+            'healing_pot': Treasure(
+                name = 'Lesser Healing Potion',
+                description = 'A minor refreshment. Will slightly restore your health.',
+                type = "consume",
+                consumable_effect = 'heal',
+                consumable_potency = 10,
+                stat_buff = 'none',
+                stat_potency = 0,
+                reduction = False,
+                damage_reduction = 0,
+                boost = False,
+                damage_boost = 0,
+                level = 1,
+                cost = 10,
+            ),
+            'mana_pot':Treasure(
+                name = 'Lesser Mana Potion',
+                description = 'A minor refreshment. Will slightly restore your mana.',
+                type = 'consume',
+                consumable_effect = 'mana',
+                consumable_potency = 12,
+                stat_buff = 'none',
+                stat_potency = 0,
+                reduction = False,
+                damage_reduction = 0,
+                boost = False,
+                damage_boost = 0,
+                level = 1,
+                cost = 15,
+            ),
+            'axe':Treasure(
+                name = 'Hand Axe',
+                description = 'A decent substitute for a proper weapon. Will definitely be useful to chop wood with',
+                type = 'wep',
+                consumable_effect = 'none',
+                consumable_potency = 0,
+                stat_buff = 'none',
+                stat_potency = 0,
+                reduction = False,
+                damage_reduction = 0,
+                boost = True,
+                damage_boost = 4,
+                level = 3,
+                cost = 20,
+            ),
+            'leather': Treasure(
+                name = 'Leather Armor',
+                description = 'A beaten up set of chainmail. Even with a good sand polishing, the rust would remain.',
+                type = 'arm',
+                consumable_effect = 'none',
+                consumable_potency = 0,
+                stat_buff = 'none',
+                stat_potency = 0,
+                reduction = True,
+                damage_reduction = 8,
+                boost = False,
+                damage_boost = 0,
+                level = 5,
+                cost = 30,
+            ),
+            'warhammer': Treasure(
+                name = 'Warhammer',
+                description = 'A decent substitute for a proper weapon. Will definitely be useful to chop wood with',
+                type = 'wep',
+                consumable_effect = 'none',
+                consumable_potency = 0,
+                stat_buff = 'none',
+                stat_potency = 0,
+                reduction = False,
+                damage_reduction = 0,
+                boost = True,
+                damage_boost = 9,
+                level = 5,
+                cost = 40,
+            ),
+        'healing_pot_2': Treasure(
+            name = 'Healing Potion',
             description = 'A minor refreshment. Will slightly restore your health.',
             type = "consume",
             consumable_effect = 'heal',
-            consumable_potency = 10,
+            consumable_potency = 25,
             stat_buff = 'none',
             stat_potency = 0,
             reduction = False,
             damage_reduction = 0,
             boost = False,
             damage_boost = 0,
-            level = 1,
-            cost = 10,
-        )
-        mana_pot = Treasure(
-            name = 'Lesser Mana Potion',
+            level = 4,
+            cost = 20,
+        ),
+        'mana_pot_2': Treasure(
+            name = 'Mana Potion',
             description = 'A minor refreshment. Will slightly restore your mana.',
             type = 'consume',
             consumable_effect = 'mana',
-            consumable_potency = 12,
+            consumable_potency = 25,
             stat_buff = 'none',
             stat_potency = 0,
             reduction = False,
             damage_reduction = 0,
             boost = False,
             damage_boost = 0,
-            level = 1,
-            cost = 15,
-        )
-        axe = Treasure(
-            name = 'Hand Axe',
-            description = 'A decent substitute for a proper weapon. Will definitely be useful to chop wood with',
-            type = 'wep',
-            consumable_effect = 'none',
-            consumable_potency = 0,
-            stat_buff = 'none',
-            stat_potency = 0,
-            reduction = False,
-            damage_reduction = 0,
-            boost = True,
-            damage_boost = 4,
-            level = 3,
-            cost = 20,
-        )
-        
-        items = [dagger, rags, sword, chain, healing_pot, mana_pot, axe]
-        db.session.add_all(items)
+            level = 4,
+            cost = 30,
+        ),
+        }
+        db.session.add_all(list(items.values()))
         db.session.commit()
         
+        items_list = Treasure.query.all()
         ################################################################
         print('Creating Classes...')
         barbarian = Class(
@@ -197,7 +259,7 @@ if __name__ == '__main__':
         abilities = {
             'heal': Ability(
                 name = 'Lesser Heal',
-                cost = 4,
+                cost = 8,
                 status_effect = True, 
                 effect_hostile = False,
                 effect_version = 'Heal',
@@ -210,7 +272,7 @@ if __name__ == '__main__':
             ),
             'fireBolt': Ability(
                 name = 'Firebolt',
-                cost = 5,
+                cost = 9,
                 effect_version = 'Spell',
                 damaging = True,
                 damage_type = 'Magical',
@@ -221,7 +283,7 @@ if __name__ == '__main__':
             ),
             'pound': Ability(
                 name = 'Pound',
-                cost = 6,
+                cost = 10,
                 status_effect = True,
                 effect_hostile = True,
                 effect_version = 'Stun',
@@ -236,8 +298,8 @@ if __name__ == '__main__':
                 level_req = 1,
             ),
             'garrote': Ability(
-                name = 'garrote',
-                cost = 5,
+                name = 'Garrote',
+                cost = 9,
                 status_effect = True,
                 effect_hostile = True,
                 effect_version = 'Bleed',
@@ -252,6 +314,112 @@ if __name__ == '__main__':
                 damage_bonus = 5,
                 level_req = 1,
             ),
+            'flash_bang': Ability(
+                name = 'Flash Bang',
+                cost = 14,
+                status_effect = True,
+                effect_hostile = True,
+                effect_version = 'Stun',
+                effect_type = 'Magical',
+                effect_power = 10,
+                effect_ability = 'agi',
+                damaging = True,
+                damage_type = 'Magical',
+                damage_range = 1,
+                damage_ability = 'agi',
+                damage_bonus = 16,
+                level_req = 3,
+            ),
+            'slash': Ability(
+                name = 'Heavy Slash',
+                cost = 18,
+                effect_version = 'Spell',
+                damaging = True,
+                damage_type = 'Physical',
+                damage_range = 1,
+                damage_ability = 'agi',
+                damage_bonus = 30,
+                level_req = 5
+            ),
+            'scorch': Ability(
+                name = 'Scorch',
+                cost = 18,
+                status_effect = True,
+                effect_hostile = True,
+                effect_version = 'Bleed',
+                effect_type = 'Magical',
+                effect_power = 13,
+                effect_ability = 'mag',
+                effect_duration = 2,
+                damaging = True,
+                damage_type = 'Magical',
+                damage_range = 1,
+                damage_ability = 'mag',
+                damage_bonus = 12,
+                level_req = 3,
+            ),
+            'fireball': Ability(
+                name = 'Fireball',
+                cost = 24,
+                effect_version = 'Spell',
+                damaging = True,
+                damage_type = 'Magical',
+                damage_range = 1,
+                damage_ability = 'mag',
+                damage_bonus = 35,
+                level_req = 5
+            ),
+            'smite': Ability(
+                name = 'Smite',
+                cost = 15,
+                effect_version = 'Spell',
+                damaging = True,
+                damage_type = 'Magical',
+                damage_range = 1,
+                damage_ability = 'mag',
+                damage_bonus = 20,
+                level_req = 3
+            ),
+            'blinding_light': Ability(
+                name = 'Blinding Light',
+                cost = 22,
+                status_effect = True,
+                effect_hostile = True,
+                effect_version = 'Stun',
+                effect_type = 'Magical',
+                effect_power = 17,
+                effect_ability = 'mag',
+                damaging = True,
+                damage_type = 'Magical',
+                damage_range = 1,
+                damage_ability = 'mag',
+                damage_bonus = 20,
+                level_req = 5,
+            ),
+            'rally': Ability(
+                name = 'Rally',
+                cost = 10,
+                status_effect = True, 
+                effect_hostile = False,
+                effect_version = 'Heal',
+                effect_type = 'None',
+                effect_range = 1,
+                effect_ability = 'mag',
+                effect_power = 5,
+                damaging = False,
+                level_req = 3
+            ),
+            'crush': Ability(
+                name = 'Crush',
+                cost = 15,
+                effect_version = 'Spell',
+                damaging = True,
+                damage_type = 'Phyiscal',
+                damage_range = 1,
+                damage_ability = 'str',
+                damage_bonus = 28,
+                level_req = 5
+            )
         }
         
         db.session.add_all(list(abilities.values()))
@@ -275,6 +443,38 @@ if __name__ == '__main__':
             'thief_garrote': Class_Ability_Association(
                 class_id = thief.id,
                 ability_id = ability_list[3].id
+            ),
+            'thief_flash_bang': Class_Ability_Association(
+                class_id = thief.id,
+                ability_id = ability_list[4].id
+            ),
+            'thief_slash': Class_Ability_Association(
+                class_id = thief.id,
+                ability_id = ability_list[5].id
+            ),
+            'evoker_scorch': Class_Ability_Association(
+                class_id = evoker.id,
+                ability_id  = ability_list[6].id
+            ),
+            'evoker_fireball': Class_Ability_Association(
+                class_id = evoker.id,
+                ability_id = ability_list[7].id
+            ),
+            'cleric_smite': Class_Ability_Association(
+                class_id = cleric.id,
+                ability_id = ability_list[8].id
+            ),
+            'cleric_blinding_light': Class_Ability_Association(
+                class_id = cleric.id,
+                ability_id = ability_list[9].id
+            ),
+            'barbarian_rally': Class_Ability_Association(
+                class_id = barbarian.id,
+                ability_id = ability_list[10].id
+            ),
+            'barbarian_crush': Class_Ability_Association(
+                class_id = barbarian.id,
+                ability_id = ability_list[11].id
             )
         }
         
@@ -286,7 +486,7 @@ if __name__ == '__main__':
             'goblin': Monster(
                 name = 'Goblin',
                 img_url = "https://www.dndbeyond.com/avatars/thumbnails/30783/955/1000/1000/638062024584880857.png",
-                hp = 15,
+                hp = 21,
                 mp = 10,
                 str = 12,
                 agi = 17,
@@ -304,7 +504,7 @@ if __name__ == '__main__':
             'treeman' : Monster(
                 name = 'Tree Man',
                 img_url = "https://www.dndbeyond.com/avatars/thumbnails/36576/553/1000/1000/638291908477327963.png",
-                hp = 20,
+                hp = 36,
                 mp = 14,
                 str = 19,
                 agi = 15,
@@ -322,7 +522,7 @@ if __name__ == '__main__':
             'skeleton': Monster(
                 name = 'Skeleton',
                 img_url = "https://www.dndbeyond.com/avatars/thumbnails/30835/849/1000/1000/638063922565505819.png",
-                hp = 27,
+                hp = 65,
                 mp = 17,
                 str = 19,
                 agi = 24,
@@ -340,7 +540,7 @@ if __name__ == '__main__':
             'orc': Monster(
                 name = 'Orc',
                 img_url = "https://www.dndbeyond.com/avatars/thumbnails/30834/160/1000/1000/638063882785865067.png",
-                hp = 39,
+                hp = 132,
                 mp = 14,
                 str = 24,
                 agi = 20,
@@ -358,7 +558,7 @@ if __name__ == '__main__':
             'bandit': Monster(
                 name = 'Bandit',
                 img_url = "https://www.dndbeyond.com/avatars/thumbnails/30849/318/1000/1000/638064499691067109.png",
-                hp = 52,
+                hp = 165,
                 mp = 14,
                 str = 28,
                 agi = 25,
@@ -376,7 +576,7 @@ if __name__ == '__main__':
             'ankheg': Monster(
                 name = 'Ankheg',
                 img_url = 'https://www.dndbeyond.com/avatars/thumbnails/30761/865/1000/1000/638061096692582271.png',
-                hp = 76,
+                hp = 192,
                 mp = 26,
                 str = 36,
                 agi = 33,
@@ -394,7 +594,7 @@ if __name__ == '__main__':
             'owlbear': Monster(
                 name = "Owlbear",
                 img_url = 'https://www.dndbeyond.com/avatars/thumbnails/30834/185/1000/1000/638063883093825018.png',
-                hp = 97,
+                hp = 245,
                 mp = 43,
                 str = 47,
                 agi = 39,
@@ -490,8 +690,8 @@ if __name__ == '__main__':
                 max_hp = 10,
                 current_mp = 10,
                 max_mp = 10,
-                wep_id = dagger.id,
-                arm_id = rags.id
+                wep_id = items_list[2].id,
+                arm_id = items_list[3].id
             ),
             'Test_Cleric': Char(
                 char_name = 'Test Cleric',
@@ -506,8 +706,8 @@ if __name__ == '__main__':
                 max_hp = 10,
                 current_mp = 10,
                 max_mp = 10,
-                wep_id = dagger.id,
-                arm_id = rags.id
+                wep_id = items_list[2].id,
+                arm_id = items_list[3].id
             ),
             'Test_Evoker': Char(
                 char_name = 'Test 1',
@@ -522,8 +722,8 @@ if __name__ == '__main__':
                 max_hp = 10,
                 current_mp = 10,
                 max_mp = 10,
-                wep_id = dagger.id,
-                arm_id = rags.id
+                wep_id = items_list[2].id,
+                arm_id = items_list[3].id
             ),
             'Test_Thief': Char(
                 char_name = 'Test Thief',
@@ -538,8 +738,8 @@ if __name__ == '__main__':
                 max_hp = 10,
                 current_mp = 10,
                 max_mp = 10,
-                wep_id = dagger.id,
-                arm_id = rags.id
+                wep_id = items_list[2].id,
+                arm_id = items_list[3].id
             )
         }
         
@@ -564,10 +764,6 @@ if __name__ == '__main__':
         print('Creating Inventories')
         inventory = Inventory(
             user_id = user1.id,
-            slot_1 = sword.id,
-            slot_2 = chain.id,
-            slot_3 = healing_pot.id,
-            slot_4 = mana_pot.id,
         )
         db.session.add(inventory)
         db.session.commit()
